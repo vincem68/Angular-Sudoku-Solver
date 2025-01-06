@@ -1,0 +1,18 @@
+button {
+    background-color: red;
+    color: black;
+    margin: 5px;
+    justify-content: center;
+}
+
+.boardSection {
+    border: solid;
+    border-color: black;
+    margin: auto;
+    justify-content: center;
+}
+
+.boardSection > div {
+    display: inline-flex;
+    margin: 0;
+}

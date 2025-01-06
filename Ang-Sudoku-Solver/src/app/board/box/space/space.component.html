@@ -1,0 +1,9 @@
+<!--This is the template for each space. It will be a div element, with a textbox that appears upon
+clicking the space for user input and the text display-->
+
+<div (mouseenter)="inFocus()" (mouseleave)="inFocus()">
+
+    <input type="text" [hidden]="!divFocus">
+    <p [hidden]="divFocus">{{value}}</p>
+
+</div>

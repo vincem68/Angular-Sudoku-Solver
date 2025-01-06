@@ -1,0 +1,6 @@
+div {
+    border: solid;
+    border-color: black;
+    display: table;
+    margin: auto;
+}
