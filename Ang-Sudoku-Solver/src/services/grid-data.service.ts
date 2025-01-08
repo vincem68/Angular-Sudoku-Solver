@@ -5,11 +5,11 @@ import { Injectable } from '@angular/core';
 })
 export class GridDataService {
 
-  private grid: number[][]; 
+  private grid: number[][]; //the overall grid that contains the values, all initialized to 0 (empty)
+  private invalidInputCounter: number; //the number of invalid inputs the board currently holds
 
   constructor() { 
     
-    //this overall 2D array to represent the grid, initialized all spaces as 0 (empty)
     this.grid = [
       [0,0,0,0,0,0,0,0,0],
       [0,0,0,0,0,0,0,0,0],
@@ -21,19 +21,16 @@ export class GridDataService {
       [0,0,0,0,0,0,0,0,0],
       [0,0,0,0,0,0,0,0,0]
     ];
+
+    this.invalidInputCounter = 0;
   }
 
-  //put methods here to let components grab row and column data
-  public getRow(row: number){
-    return this.grid[row];
+  //have Box components call this method whenever a space has their value changed
+  public getValue(row: number, column: number){
+    return this.grid[row][column];
   }
 
-  public getColumn(column: number){
-    let col: number[] = [];
-    this.grid.forEach(row => col.push(row[column]));
-    return col;
-  }
-
+  //use this in the space component given its coordinates
   public addNumber(row: number, column: number, number: number) {
     this.grid[row][column] = number;
   }

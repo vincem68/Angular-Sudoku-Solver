@@ -3,7 +3,7 @@ clicking the space for user input and the text display-->
 
 <div (mouseenter)="inFocus()" (mouseleave)="inFocus()">
 
-    <input type="text" [hidden]="!divFocus">
-    <p [hidden]="divFocus">{{value}}</p>
+    <input type="text" [hidden]="!divFocus" (ngModelChange)="value">
+    <p [hidden]="divFocus">{{ value }}</p>
 
 </div>

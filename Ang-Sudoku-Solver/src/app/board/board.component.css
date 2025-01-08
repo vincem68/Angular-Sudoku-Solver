@@ -1,3 +1,4 @@
+
 button {
     background-color: red;
     color: black;
@@ -6,13 +7,11 @@ button {
 }
 
 .boardSection {
-    border: solid;
-    border-color: black;
     margin: auto;
     justify-content: center;
 }
 
 .boardSection > div {
     display: inline-flex;
-    margin: 0;
+    margin: 0%;
 }
