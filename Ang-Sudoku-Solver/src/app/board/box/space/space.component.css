@@ -1,5 +1,4 @@
 div {
-    color: white;
     border-style: solid;
     border-color: black;
     width: 50px;
@@ -11,4 +10,12 @@ div {
 input[type=text] {
     width: 100%;
     text-align: center;
+}
+
+.validSpace {
+    background-color: white;
+}
+
+.invalidSpace {
+    background-color: red;
 }

@@ -1,9 +1,10 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { GridDataService } from '../../../../services/grid-data.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'space',
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './space.component.html',
   styleUrl: './space.component.css'
 })
@@ -16,13 +17,15 @@ export class SpaceComponent {
    */
   @Input() value: string = "";
   @Input() gridCoords!: number[];
-  @Output() valueChange: EventEmitter<number> = new EventEmitter<number>();
 
-  divFocus: boolean = false;
+  inFocus: boolean = false;
+  isValid: boolean = true;
 
   constructor(private gridData: GridDataService){ }
 
-  inFocus(): void {
-    this.divFocus = !this.divFocus;
+  //update the grid here, check to make sure empty strings send 0s or that we don't exceed 1 digit
+  update() {
+    const numValue = (this.value == "") ? 0 : Number(this.value);
+    this.gridData.addValue(this.gridCoords[0], this.gridCoords[1], this.gridCoords[2], numValue);
   }
 }

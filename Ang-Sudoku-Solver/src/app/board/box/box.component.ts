@@ -1,5 +1,6 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { SpaceComponent } from './space/space.component';
+import { GridDataService } from '../../../services/grid-data.service';
 
 @Component({
   selector: 'box',
@@ -7,7 +8,7 @@ import { SpaceComponent } from './space/space.component';
   templateUrl: './box.component.html',
   styleUrl: './box.component.css'
 })
-export class BoxComponent {
+export class BoxComponent implements OnInit {
 
   /**
    * Each Box component will have these vars that contains their adjacent indexes in the overall grid.
@@ -23,8 +24,52 @@ export class BoxComponent {
   @Input() rowIndexes!: number[];
   @Input() columnIndexes!: number[];
 
-  //for checking whenever the user changes the value of one of the space components, change the color
-  checkForInvalidNumber(){
-    return 1;
+  constructor(private gridData: GridDataService) {}
+
+  boxSubGrid: number[][] = 
+    [
+      [0,0,0],
+      [0,0,0],
+      [0,0,0]
+    ];
+
+  //this makes the box component subscribe to listening for changed values of spaces
+  ngOnInit(): void {
+    this.gridData.grid.subscribe(newGrid => {
+
+      this.boxSubGrid[0] = newGrid[this.rowIndexes[0]]
+        .slice(this.columnIndexes[0], this.columnIndexes[2] + 1);
+
+      this.boxSubGrid[1] = newGrid[this.rowIndexes[1]]
+      .slice(this.columnIndexes[0], this.columnIndexes[2] + 1);
+
+      this.boxSubGrid[2] = newGrid[this.rowIndexes[2]]
+        .slice(this.columnIndexes[0], this.columnIndexes[2] + 1);
+    });
+
+    this.gridData.changedSpaceValueCoords.subscribe(coords => {
+
+      if (coords[0] == this.boxIndex){
+        this.checkBoxForInvalidNumber(coords[3]);
+      } 
+
+    });
   }
+
+  //check the 3x3 Box to make sure no duplicates in 3x3 Box
+  checkBoxForInvalidNumber(value: number){
+    let counter = 0;
+    for (let i = 0; i < 3; i++){
+      for (let j = 0; j < 3; j++){
+        if (this.boxSubGrid[i][j] == value){
+          counter++;
+        }
+      }
+    }
+
+    if (counter > 1){
+      //do something here to make spaces with that value red
+    }
+  }
+
 }

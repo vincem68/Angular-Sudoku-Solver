@@ -1,16 +1,12 @@
 import { Injectable } from '@angular/core';
+import { Subject, BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GridDataService {
 
-  private grid: number[][]; //the overall grid that contains the values, all initialized to 0 (empty)
-  private invalidInputCounter: number; //the number of invalid inputs the board currently holds
-
-  constructor() { 
-    
-    this.grid = [
+  private gridSubject = new BehaviorSubject<number[][]>([
       [0,0,0,0,0,0,0,0,0],
       [0,0,0,0,0,0,0,0,0],
       [0,0,0,0,0,0,0,0,0],
@@ -20,18 +16,25 @@ export class GridDataService {
       [0,0,0,0,0,0,0,0,0],
       [0,0,0,0,0,0,0,0,0],
       [0,0,0,0,0,0,0,0,0]
-    ];
+  ]);
+  grid = this.gridSubject.asObservable();
 
-    this.invalidInputCounter = 0;
-  }
+  private changedSpaceValueCoordsSubject = new Subject<number[]>();
+  changedSpaceValueCoords = this.changedSpaceValueCoordsSubject.asObservable();
+  
+  //private invalidInputCounter: number = 0;
+  
+  //add the value to the grid and emit the new grid and the coords of the space changed
+  addValue(box: number, row: number, column: number, value: number): void {
 
-  //have Box components call this method whenever a space has their value changed
-  public getValue(row: number, column: number){
-    return this.grid[row][column];
-  }
+    //get grid and update it
+    let grid = this.gridSubject.getValue();
+    grid[row][column] = value;
 
-  //use this in the space component given its coordinates
-  public addNumber(row: number, column: number, number: number) {
-    this.grid[row][column] = number;
+    //emit the grid to the other components
+    this.gridSubject.next(grid);
+
+    //emit the coords of the space value
+    this.changedSpaceValueCoordsSubject.next([box, row, column, value]);
   }
 }
