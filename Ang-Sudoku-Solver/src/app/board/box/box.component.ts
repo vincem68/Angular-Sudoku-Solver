@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, QueryList, ViewChildren, AfterViewInit } from '@angular/core';
 import { SpaceComponent } from './space/space.component';
 import { GridDataService } from '../../../services/grid-data.service';
 
@@ -8,7 +8,7 @@ import { GridDataService } from '../../../services/grid-data.service';
   templateUrl: './box.component.html',
   styleUrl: './box.component.css'
 })
-export class BoxComponent implements OnInit {
+export class BoxComponent implements AfterViewInit {
 
   /**
    * Each Box component will have these vars that contains their adjacent indexes in the overall grid.
@@ -24,52 +24,53 @@ export class BoxComponent implements OnInit {
   @Input() rowIndexes!: number[];
   @Input() columnIndexes!: number[];
 
+  @ViewChildren(SpaceComponent) spaces!: QueryList<SpaceComponent>;
+
   constructor(private gridData: GridDataService) {}
 
-  boxSubGrid: number[][] = 
-    [
-      [0,0,0],
-      [0,0,0],
-      [0,0,0]
-    ];
+  subGridIndex: number[][][] = [[],[],[],[],[],[],[],[],[]];
 
   //this makes the box component subscribe to listening for changed values of spaces
-  ngOnInit(): void {
-    this.gridData.grid.subscribe(newGrid => {
-
-      this.boxSubGrid[0] = newGrid[this.rowIndexes[0]]
-        .slice(this.columnIndexes[0], this.columnIndexes[2] + 1);
-
-      this.boxSubGrid[1] = newGrid[this.rowIndexes[1]]
-      .slice(this.columnIndexes[0], this.columnIndexes[2] + 1);
-
-      this.boxSubGrid[2] = newGrid[this.rowIndexes[2]]
-        .slice(this.columnIndexes[0], this.columnIndexes[2] + 1);
-    });
+  ngAfterViewInit(): void {
 
     this.gridData.changedSpaceValueCoords.subscribe(coords => {
 
       if (coords[0] == this.boxIndex){
-        this.checkBoxForInvalidNumber(coords[3]);
+
+        const index = [coords[1],coords[2]];
+
+        //if we make a space empty
+        if (coords[3] == 0){
+
+          //do something here to check 
+
+          this.spaces.forEach(space => {
+            //before removing from index list give validSpace class
+            if (coords[1] == space.gridCoords[1] && coords[2] == space.gridCoords[2]){
+              space.isValid = true;
+            }
+          });
+
+          this.subGridIndex[coords[3] - 1]
+            .splice(this.subGridIndex[coords[3] - 1].indexOf(index), 1);
+
+        } else { //if we give a space a value
+
+          this.subGridIndex[coords[3] - 1].push(index);
+
+          if (this.subGridIndex[coords[3] - 1].length > 1){
+
+            //get the spaces that have the row/col index
+            this.spaces.forEach(space => {
+              if (this.subGridIndex[coords[3] - 1].includes([space.gridCoords[1],space.gridCoords[2]])){
+                space.isValid = false;
+              }
+            });
+          }
+        }
       } 
 
     });
-  }
-
-  //check the 3x3 Box to make sure no duplicates in 3x3 Box
-  checkBoxForInvalidNumber(value: number){
-    let counter = 0;
-    for (let i = 0; i < 3; i++){
-      for (let j = 0; j < 3; j++){
-        if (this.boxSubGrid[i][j] == value){
-          counter++;
-        }
-      }
-    }
-
-    if (counter > 1){
-      //do something here to make spaces with that value red
-    }
   }
 
 }

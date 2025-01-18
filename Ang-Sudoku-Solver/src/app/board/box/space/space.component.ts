@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges} from '@angular/core';
 import { GridDataService } from '../../../../services/grid-data.service';
 import { CommonModule } from '@angular/common';
 
@@ -24,7 +24,7 @@ export class SpaceComponent {
   constructor(private gridData: GridDataService){ }
 
   //update the grid here, check to make sure empty strings send 0s or that we don't exceed 1 digit
-  update() {
+  update(): void {
     const numValue = (this.value == "") ? 0 : Number(this.value);
     this.gridData.addValue(this.gridCoords[0], this.gridCoords[1], this.gridCoords[2], numValue);
   }

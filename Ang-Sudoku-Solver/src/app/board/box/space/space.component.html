@@ -1,7 +1,8 @@
 <!--This is the template for each space. It will be a div element, with a textbox that appears upon
 clicking the space for user input and the text display-->
 
-<div [ngClass]="{'.validSpace': this.isValid, 'invalidSpace': !this.isValid}" (mouseenter)="inFocus = !inFocus" (mouseleave)="inFocus = !inFocus">
+<div [ngClass]="{'.validSpace': this.isValid, 'invalidSpace': !this.isValid}" 
+    (mouseenter)="inFocus = !inFocus" (mouseleave)="inFocus = !inFocus">
 
     <input type="text" (change)="update()" [hidden]="!inFocus" maxlength="1">
     <p [hidden]="inFocus">{{ value }}</p>
