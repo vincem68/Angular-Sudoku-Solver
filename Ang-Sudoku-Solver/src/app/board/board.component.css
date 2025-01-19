@@ -13,5 +13,6 @@ button {
 
 .boardSection > div {
     display: inline-flex;
+    flex-direction: column;
     margin: 0%;
 }

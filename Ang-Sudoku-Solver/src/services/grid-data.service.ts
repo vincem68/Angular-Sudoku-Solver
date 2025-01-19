@@ -31,4 +31,8 @@ export class GridDataService {
     //emit the coords of the space value
     this.changedSpaceValueCoordsSubject.next([box, row, column, value]);
   }
+
+  solvePuzzle(){
+    
+  }
 }

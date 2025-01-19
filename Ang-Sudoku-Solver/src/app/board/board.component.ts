@@ -55,6 +55,11 @@ export class BoardComponent implements AfterViewInit {
       this.columns[coords[2]][coords[1]] = coords[3];
     });
 
-
   }
+
+  //link the function from the solve file
+  /*
+  solveGrid(){
+    solve(this.rows, this.columns);
+  } */
 }
