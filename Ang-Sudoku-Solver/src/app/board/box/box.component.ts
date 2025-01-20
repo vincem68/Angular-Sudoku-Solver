@@ -8,7 +8,7 @@ import { GridDataService } from '../../../services/grid-data.service';
   templateUrl: './box.component.html',
   styleUrl: './box.component.css'
 })
-export class BoxComponent implements AfterViewInit {
+export class BoxComponent {
 
   /**
    * Each Box component will have these vars that contains their adjacent indexes in the overall grid.
@@ -20,6 +20,7 @@ export class BoxComponent implements AfterViewInit {
    * @columnIndexes - same as rowIndexes but is the indexes for the columns the Box contains
    *  --example: Box 1 (top left) has columns 0, 1, 2. Box 2 (top middle) is 3, 4, 5
    */
+
   @Input() boxIndex!: number;
   @Input() rowIndexes!: number[];
   @Input() columnIndexes!: number[];
@@ -31,6 +32,7 @@ export class BoxComponent implements AfterViewInit {
   subGridIndex: number[][][] = [[],[],[],[],[],[],[],[],[]];
 
   //this makes the box component subscribe to listening for changed values of spaces
+  /*
   ngAfterViewInit(): void {
 
     this.gridData.changedSpaceValueCoords.subscribe(coords => {
@@ -71,6 +73,6 @@ export class BoxComponent implements AfterViewInit {
       } 
 
     });
-  }
+  } */
 
 }

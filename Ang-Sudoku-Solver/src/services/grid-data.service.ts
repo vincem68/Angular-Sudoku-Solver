@@ -6,33 +6,20 @@ import { Subject} from 'rxjs';
 })
 export class GridDataService {
 
-  private grid: number[][] = 
-  [
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0]
-  ];
+  //declare the subjects that will send data throughout the application
+  private updatedSpaceSubject = new Subject<{box: number, row: number, column: number, value: number}>();
+  updatedSpace = this.updatedSpaceSubject.asObservable();
 
-  //grid = this.gridSubject.asObservable();
-
-  private changedSpaceValueCoordsSubject = new Subject<number[]>();
-  changedSpaceValueCoords = this.changedSpaceValueCoordsSubject.asObservable();
+  private checkRowsAndColsSubject = new Subject<{row: number, column: number, valid: boolean}>();
+  checkRowsAndCols = this.checkRowsAndColsSubject.asObservable();
   
-  //add the value to the grid and emit the new grid and the coords of the space changed
-  addValue(box: number, row: number, column: number, value: number): void {
-    //update grid
-    this.grid[row][column] = value;
-    //emit the coords of the space value
-    this.changedSpaceValueCoordsSubject.next([box, row, column, value]);
+  //send the updated space value to the BoardComponent and the coords
+  updateValue(box: number, row: number, column: number, value: number): void {
+    this.updatedSpaceSubject.next({box, row, column, value});
   }
 
-  solvePuzzle(){
-    
+  //if duplicate numbers appear or disappear in rows/cols, update corresponding SpaceComponents
+  updateRowsAndColumns(row: number, column: number, valid: boolean){
+    this.checkRowsAndColsSubject.next({row, column, valid});
   }
 }

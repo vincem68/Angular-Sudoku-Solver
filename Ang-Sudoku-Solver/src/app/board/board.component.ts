@@ -19,7 +19,7 @@ export class BoardComponent implements AfterViewInit {
 
   constructor(private gridData: GridDataService){}
 
-  rows: number[][]= [
+  rows: number[][] = [
     [0,0,0,0,0,0,0,0,0],
     [0,0,0,0,0,0,0,0,0],
     [0,0,0,0,0,0,0,0,0],
@@ -31,7 +31,7 @@ export class BoardComponent implements AfterViewInit {
     [0,0,0,0,0,0,0,0,0]
   ];
 
-  columns: number[][]= [
+  columns: number[][] = [
     [0,0,0,0,0,0,0,0,0],
     [0,0,0,0,0,0,0,0,0],
     [0,0,0,0,0,0,0,0,0],
@@ -42,19 +42,25 @@ export class BoardComponent implements AfterViewInit {
     [0,0,0,0,0,0,0,0,0],
     [0,0,0,0,0,0,0,0,0]
   ];
-
-  boxUpdateSubject = new Subject<number[]>();
-  boxUpdate = this.boxUpdateSubject.asObservable();
-
-  @ViewChildren(BoxComponent) boxes = QueryList<BoxComponent>;
 
   ngAfterViewInit(): void {
-    //update the grids
-    this.gridData.changedSpaceValueCoords.subscribe(coords => {
-      this.rows[coords[1]][coords[2]] = coords[3];
-      this.columns[coords[2]][coords[1]] = coords[3];
-    });
+  
+    this.gridData.updatedSpace.subscribe(coords => {
 
+      //first check to see if we're making a space empty
+      if (coords.value == 0){
+
+      }
+
+      if (this.rows[coords.row].includes(coords.value)){
+
+      }
+
+      //finally update the two grids after checking everything
+      this.rows[coords.row][coords.column] = coords.value;
+      this.columns[coords.column][coords.row] = coords.value;
+
+    });
   }
 
   //link the function from the solve file

@@ -8,6 +8,7 @@ div {
 }
 
 input[type=text] {
+    text-align: center;
     position: absolute;
     align-self: center;
     width: 40px;
