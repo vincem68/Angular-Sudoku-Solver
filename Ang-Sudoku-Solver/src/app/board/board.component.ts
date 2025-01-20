@@ -12,9 +12,7 @@ import { Subject } from 'rxjs';
 export class BoardComponent implements AfterViewInit {
 
   /**
-   * The idea of the Board Component will be to keep a record of all rows and columns and see if
-   * any updates by the changedSpaceValueCoords subject results in duplicate values in rows/columns
-   * @param gridData 
+   * 
    */
 
   constructor(private gridData: GridDataService){}
@@ -46,26 +44,69 @@ export class BoardComponent implements AfterViewInit {
   ngAfterViewInit(): void {
   
     this.gridData.updatedSpace.subscribe(coords => {
-
-      //first check to see if we're making a space empty
+      //call function based on if we're emptying or filling a space
       if (coords.value == 0){
-
+        this.emptyingSpace(coords.row, coords.column, coords.value);
+      } else {
+        this.fillingSpace(coords.row, coords.column, coords.value);
       }
-
-      if (this.rows[coords.row].includes(coords.value)){
-
-      }
-
-      //finally update the two grids after checking everything
-      this.rows[coords.row][coords.column] = coords.value;
-      this.columns[coords.column][coords.row] = coords.value;
-
     });
   }
 
+  //use when we empty a space to contain empty string
+  emptyingSpace(row: number, col: number, value: number){
+    //get previous value in space about to be changed
+    const prevValue = this.rows[row][col];
+    const rowSpacesToUpdate: number[] = [];
+    const colSpacesToUpdate: number[] = [];
+
+      //make space empty
+      this.rows[row][col] = value;
+      this.columns[col][row] = value;
+
+      //gather any spaces that have old value in row and column
+      for (let i = 0; i < 9; i++){
+        if (this.rows[row][i] == prevValue){
+          rowSpacesToUpdate.push(i);
+        }
+        if (this.columns[col][i] == prevValue){
+          colSpacesToUpdate.push(i);
+        }
+      }
+
+      if (rowSpacesToUpdate.length == 1){
+        this.gridData.updateRowsAndColumns(row, rowSpacesToUpdate[0], true);
+      }
+      if (colSpacesToUpdate.length == 1){
+        this.gridData.updateRowsAndColumns(colSpacesToUpdate[0], col, true);
+      }
+  }
+
+
+  fillingSpace(row: number, col: number, value: number){
+
+    //go through row, find first instance of duplicate entry
+    for (let i = 0; i < 9; i++){
+      if (this.rows[row][i] == value){
+        this.gridData.updateRowsAndColumns(row, i, false);
+        this.gridData.updateRowsAndColumns(row, col, false);
+        break;
+      }
+    }
+
+    //now do the same in columns
+    for (let i = 0; i < 9; i++){
+      if (this.columns[col][i] == value){
+        this.gridData.updateRowsAndColumns(i, col, false);
+        this.gridData.updateRowsAndColumns(row, col, false);
+        break;
+      }
+    }
+
+    //finally, update the grid
+    this.rows[row][col] = value;
+    this.columns[col][row] = value;
+  }
+
   //link the function from the solve file
-  /*
-  solveGrid(){
-    solve(this.rows, this.columns);
-  } */
 }

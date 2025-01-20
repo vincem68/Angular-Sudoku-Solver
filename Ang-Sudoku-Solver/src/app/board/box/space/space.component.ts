@@ -16,11 +16,12 @@ export class SpaceComponent implements AfterViewInit {
    * @gridCoords - a number array that holds the box index, row index, and column index in the overall
    *  grid
    */
-  value: string = "";
+
   @Input() gridCoords!: number[];
 
   inFocus: boolean = false;
   isValid: boolean = true;
+  value: string = "";
 
   constructor(private gridData: GridDataService){ }
 
@@ -34,9 +35,11 @@ export class SpaceComponent implements AfterViewInit {
 
   //update the grid here, check to make sure empty strings send 0s or that we don't exceed 1 digit
   update(): void {
-    if (Number.isNaN(this.value)){
+    if (Number.isNaN(Number(this.value))){
       this.value = "";
-      return;
+    }
+    if (this.value == ""){
+      this.isValid = true;
     }
     const numValue = (this.value == "") ? 0 : Number(this.value);
     this.gridData.updateValue(this.gridCoords[0], this.gridCoords[1], this.gridCoords[2], numValue);
