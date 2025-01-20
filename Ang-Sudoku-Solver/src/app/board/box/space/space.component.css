@@ -4,19 +4,22 @@ div {
     width: 50px;
     height: 50px;
     display: inline-flex;
+    margin: 0%;
 }
 
 input[type=text] {
+    position: absolute;
     align-self: center;
     width: 40px;
-    text-align: center;
+    height: 40px;
 }
 
 p {
     text-align: center;
     display: inline;
     color:black;
-    
+    padding-left: 40%;
+    font-size: medium;
 }
 
 .validSpace {

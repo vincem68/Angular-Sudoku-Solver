@@ -2,17 +2,25 @@
 button {
     background-color: red;
     color: black;
-    margin: 5px;
-    justify-content: center;
+    margin: 15px;
+    justify-items: center;
 }
 
 .boardSection {
-    margin: auto;
+    display: flex;
     justify-content: center;
+    align-items: center;
 }
 
 .boardSection > div {
     display: inline-flex;
     flex-direction: column;
     margin: 0%;
+}
+
+.buttonSection {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px;
 }
