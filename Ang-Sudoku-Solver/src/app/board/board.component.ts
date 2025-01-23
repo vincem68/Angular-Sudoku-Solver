@@ -46,61 +46,78 @@ export class BoardComponent implements AfterViewInit {
     this.gridData.updatedSpace.subscribe(coords => {
       //call function based on if we're emptying or filling a space
       if (coords.value == 0){
-        this.emptyingSpace(coords.row, coords.column, coords.value);
+        this.emptyingSpace(coords.row, coords.column);
       } else {
         this.fillingSpace(coords.row, coords.column, coords.value);
       }
     });
   }
 
-  //use when we empty a space to contain empty string
-  emptyingSpace(row: number, col: number, value: number){
+  /**
+   * When ngModelChange is called and we make a space empty, call this to see if we need to update any
+   * spaces to be valid if that space contains the same number and there's no more than 2 occurrances
+   * in both the row and column
+   * @param row 
+   * @param col 
+   */
+  emptyingSpace(row: number, col: number){
     //get previous value in space about to be changed
     const prevValue = this.rows[row][col];
-    const rowSpacesToUpdate: number[] = [];
-    const colSpacesToUpdate: number[] = [];
 
-      //make space empty
-      this.rows[row][col] = value;
-      this.columns[col][row] = value;
+    //make space empty
+    this.rows[row][col] = 0;
+    this.columns[col][row] = 0;
 
-      //gather any spaces that have old value in row and column
-      for (let i = 0; i < 9; i++){
-        if (this.rows[row][i] == prevValue){
-          rowSpacesToUpdate.push(i);
+    //see if there is a duplicate in row already
+    let duplicate = this.rows[row].indexOf(prevValue);
+    if (duplicate != -1){
+      //if there is, see if there's a second duplicate in row
+      let secondDuplicate = (duplicate == 8) ? -1 : this.rows[row].indexOf(prevValue, duplicate + 1);
+      if (secondDuplicate == -1) { //if not, check that column if there's more than 1 occurrence
+        let change = true;
+        for (let i = 0; i < 9; i++){
+          if (this.columns[duplicate][i] == prevValue && i != row){
+            change = false;
+          }
         }
-        if (this.columns[col][i] == prevValue){
-          colSpacesToUpdate.push(i);
+        if (change){ //make space valid if just one occurrence in column
+          this.gridData.updateRowsAndColumns(row, duplicate, true);
         }
       }
-
-      if (rowSpacesToUpdate.length == 1){
-        this.gridData.updateRowsAndColumns(row, rowSpacesToUpdate[0], true);
+    }
+    //now do the same for the columns
+    duplicate = this.columns[col].indexOf(prevValue);
+    if (duplicate != -1) {
+      let secondDuplicate = (duplicate == 8) ? -1 : this.columns[col].indexOf(prevValue, duplicate + 1);
+      if (secondDuplicate == -1) { 
+        let change = true;
+        for (let i = 0; i < 9; i++){
+          if (this.rows[duplicate][i] == prevValue && i != col){
+            change = false;
+          }
+        }
+        if (change){ 
+          this.gridData.updateRowsAndColumns(duplicate, col, true);
+        }
       }
-      if (colSpacesToUpdate.length == 1){
-        this.gridData.updateRowsAndColumns(colSpacesToUpdate[0], col, true);
-      }
+    }
   }
 
 
   fillingSpace(row: number, col: number, value: number){
 
-    //go through row, find first instance of duplicate entry
-    for (let i = 0; i < 9; i++){
-      if (this.rows[row][i] == value){
-        this.gridData.updateRowsAndColumns(row, i, false);
-        this.gridData.updateRowsAndColumns(row, col, false);
-        break;
-      }
+    //see if there is occurrence of number in row already
+    let duplicate = this.rows[row].indexOf(value);
+    if (duplicate != -1){ //if yes, make both spaces invalid
+      this.gridData.updateRowsAndColumns(row, duplicate, false);
+      this.gridData.updateRowsAndColumns(row, col, false);
     }
 
-    //now do the same in columns
-    for (let i = 0; i < 9; i++){
-      if (this.columns[col][i] == value){
-        this.gridData.updateRowsAndColumns(i, col, false);
-        this.gridData.updateRowsAndColumns(row, col, false);
-        break;
-      }
+    //now check in columns
+    duplicate = this.columns[col].indexOf(value);
+    if (duplicate != -1){
+      this.gridData.updateRowsAndColumns(duplicate, col, false);
+      this.gridData.updateRowsAndColumns(row, col, false);
     }
 
     //finally, update the grid

@@ -4,7 +4,7 @@ clicking the space for user input and the text display-->
 <div [ngClass]="{'.validSpace': this.isValid, 'invalidSpace': !this.isValid}" 
     (mouseenter)="inFocus = true" (mouseleave)="inFocus = false">
 
-    <input type="text" [(ngModel)]="value" (change)="update()" [hidden]="!(inFocus)" maxlength="1">
+    <input type="text" [(ngModel)]="value" (ngModelChange)="update()" [hidden]="!(inFocus)" maxlength="1">
     <p [hidden]="inFocus">{{ value }}</p>
 
 </div>
