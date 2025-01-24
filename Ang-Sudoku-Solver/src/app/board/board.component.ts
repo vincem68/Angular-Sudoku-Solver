@@ -11,10 +11,6 @@ import { Subject } from 'rxjs';
 })
 export class BoardComponent implements AfterViewInit {
 
-  /**
-   * 
-   */
-
   constructor(private gridData: GridDataService){}
 
   rows: number[][] = [
@@ -43,7 +39,7 @@ export class BoardComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
   
-    this.gridData.updatedSpace.subscribe(coords => {
+    this.gridData.updatedSpaceValue.subscribe(coords => {
       //call function based on if we're emptying or filling a space
       if (coords.value == 0){
         this.emptyingSpace(coords.row, coords.column);

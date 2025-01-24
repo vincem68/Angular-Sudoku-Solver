@@ -1,28 +1,29 @@
 import { Injectable } from '@angular/core';
-import { Subject} from 'rxjs';
+import { Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GridDataService {
 
+  //keep track of number of invalid spaces so we know when we can't call the solve method
   invalidSpaceCounter: number = 0;
 
   //declare the subjects that will send data throughout the application
-  private updatedSpaceSubject = new Subject<{box: number, row: number, column: number, value: number}>();
-  updatedSpace = this.updatedSpaceSubject.asObservable();
+  private updatedSpaceValueSubject = new Subject<{box: number, row: number, column: number, value: number}>();
+  updatedSpaceValue = this.updatedSpaceValueSubject.asObservable();
 
-  private checkRowsAndColsSubject = new Subject<{row: number, column: number, valid: boolean}>();
-  checkRowsAndCols = this.checkRowsAndColsSubject.asObservable();
+  private updatedSpaceValiditySubject = new Subject<{row: number, column: number, valid: boolean}>();
+  updatedSpaceValidity = this.updatedSpaceValiditySubject.asObservable();
   
   //send the updated space value to the BoardComponent and the coords
   updateValue(box: number, row: number, column: number, value: number): void {
-    this.updatedSpaceSubject.next({box, row, column, value});
+    this.updatedSpaceValueSubject.next({box, row, column, value});
   }
 
   //if duplicate numbers appear or disappear in rows/cols, update corresponding SpaceComponents
   updateSpaceValidity(row: number, column: number, valid: boolean){
-    this.checkRowsAndColsSubject.next({row, column, valid});
+    this.updatedSpaceValiditySubject.next({row, column, valid});
   }
 
   increaseCounter() {
