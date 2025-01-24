@@ -6,6 +6,8 @@ import { Subject} from 'rxjs';
 })
 export class GridDataService {
 
+  invalidSpaceCounter: number = 0;
+
   //declare the subjects that will send data throughout the application
   private updatedSpaceSubject = new Subject<{box: number, row: number, column: number, value: number}>();
   updatedSpace = this.updatedSpaceSubject.asObservable();
@@ -19,7 +21,19 @@ export class GridDataService {
   }
 
   //if duplicate numbers appear or disappear in rows/cols, update corresponding SpaceComponents
-  updateRowsAndColumns(row: number, column: number, valid: boolean){
+  updateSpaceValidity(row: number, column: number, valid: boolean){
     this.checkRowsAndColsSubject.next({row, column, valid});
+  }
+
+  increaseCounter() {
+    this.invalidSpaceCounter++;
+  }
+
+  decreaseCounter() {
+    this.invalidSpaceCounter--;
+  }
+
+  getCounter() {
+    return this.invalidSpaceCounter;
   }
 }

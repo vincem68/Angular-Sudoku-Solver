@@ -81,7 +81,7 @@ export class BoardComponent implements AfterViewInit {
           }
         }
         if (change){ //make space valid if just one occurrence in column
-          this.gridData.updateRowsAndColumns(row, duplicate, true);
+          this.gridData.updateSpaceValidity(row, duplicate, true);
         }
       }
     }
@@ -97,7 +97,7 @@ export class BoardComponent implements AfterViewInit {
           }
         }
         if (change){ 
-          this.gridData.updateRowsAndColumns(duplicate, col, true);
+          this.gridData.updateSpaceValidity(duplicate, col, true);
         }
       }
     }
@@ -109,15 +109,15 @@ export class BoardComponent implements AfterViewInit {
     //see if there is occurrence of number in row already
     let duplicate = this.rows[row].indexOf(value);
     if (duplicate != -1){ //if yes, make both spaces invalid
-      this.gridData.updateRowsAndColumns(row, duplicate, false);
-      this.gridData.updateRowsAndColumns(row, col, false);
+      this.gridData.updateSpaceValidity(row, duplicate, false);
+      this.gridData.updateSpaceValidity(row, col, false);
     }
 
     //now check in columns
     duplicate = this.columns[col].indexOf(value);
     if (duplicate != -1){
-      this.gridData.updateRowsAndColumns(duplicate, col, false);
-      this.gridData.updateRowsAndColumns(row, col, false);
+      this.gridData.updateSpaceValidity(duplicate, col, false);
+      this.gridData.updateSpaceValidity(row, col, false);
     }
 
     //finally, update the grid
