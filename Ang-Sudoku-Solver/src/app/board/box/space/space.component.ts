@@ -36,6 +36,12 @@ export class SpaceComponent implements AfterViewInit {
         this.isValid = signal;
         this.value = "";
       });
+
+      this.gridData.finishedGridStream.subscribe(signal => {
+        if (this.gridCoords[1] == signal.row && this.gridCoords[2] == signal.col) {
+          this.value = signal.value.toString();
+        }
+      })
   }
 
   //update the grid here, check to make sure empty strings send 0s or that we don't exceed 1 digit

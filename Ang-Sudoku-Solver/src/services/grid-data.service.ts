@@ -17,8 +17,13 @@ export class GridDataService {
   private spaceValiditySubject = new Subject<{row: number, column: number, valid: boolean}>();
   spaceValidityStream = this.spaceValiditySubject.asObservable();
 
+  //subject to clear all spaces, empty values and make them valid. Just sends true
   private clearSpacesSubject = new Subject<boolean>();
   clearSpacesStream = this.clearSpacesSubject.asObservable();
+
+  //subject to get finished grid values to their corresponding spaces
+  private finishedGridSubject = new Subject<{row: number, col: number, value: number}>();
+  finishedGridStream = this.finishedGridSubject.asObservable();
   
   //send the updated space value to the BoardComponent and the coords
   updateValue(box: number, row: number, column: number, value: number) {
@@ -30,9 +35,15 @@ export class GridDataService {
     this.spaceValiditySubject.next({row, column, valid});
   }
 
+  //send signal to clear all spaces
   clearSpaces() {
     this.invalidSpaceCounter = 0;
     this.clearSpacesSubject.next(true);
+  }
+
+  //send out values from finished grid
+  fillOutFinishedGrid(row: number, col: number, value: number) {
+    this.finishedGridSubject.next({row, col, value});
   }
 
   increaseCounter() {

@@ -1,7 +1,8 @@
-import { Component, AfterViewInit, QueryList, ViewChildren } from '@angular/core';
+import { Component, AfterViewInit } from '@angular/core';
 import { BoxComponent } from './box/box.component';
 import { GridDataService } from '../../services/grid-data.service';
 import SpaceCoords from '../../classes/SpaceCoords';
+import solve from '../../solve';
 
 @Component({
   selector: 'board',
@@ -152,5 +153,17 @@ export class BoardComponent implements AfterViewInit {
     }
     //send signal to SpaceComponents to clear value and become valid space
     this.gridData.clearSpaces();
+  }
+
+  solveGrid() {
+    //gotta do something here with the box list
+    solve(this.rows, this.columns);
+    for (let i = 0; i < 9; i++){
+      for (let j = 0; j < 9; j++){
+        this.boxes[3 * (Math.floor(i / 3)) + Math.floor(j / 3)].push(new SpaceCoords(i, j));
+        this.gridData.fillOutFinishedGrid(i, j, this.rows[i][j]);
+      }
+    }
+
   }
 }

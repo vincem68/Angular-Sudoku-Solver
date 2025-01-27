@@ -1,4 +1,4 @@
-import Box from "./Box";
+import Box from './classes/Box';
 
 
 /**
@@ -21,23 +21,15 @@ import Box from "./Box";
  * 
  */
 
-/*
-export default function solve(rows: number[][], columns: number[][]){
 
-    
-    const columns: number[][] = [[],[],[],[],[],[],[],[],[]]
-    for (let i = 0; i < 9; i++) {
-        for (let j = 0; j < 9; j++) {
-            columns[i].push(rows[j][i]); // Swap rows and columns
-        }
-    } 
+export default function solve(rows: number[][], columns: number[][]){
 
     //initialize the circular linked list for the boxes
     const box_table = createBoxList(rows);
-    let headBox = box_table[0]; let prevBox = box_table[8];
+    let headBox: any = box_table[0]; let prevBox: any = box_table[8];
 
     //start solving the puzzle
-    let crntBox: Box | null = headBox; let lastChangedBox: Box | null = null;
+    let crntBox: any = headBox; let lastChangedBox: any = null;
     
     
     while (headBox != null){
@@ -87,7 +79,7 @@ export default function solve(rows: number[][], columns: number[][]){
     } 
 
 }
-*/
+
 
 /**
  * This function creates the linked list of the boxes
@@ -96,8 +88,8 @@ export default function solve(rows: number[][], columns: number[][]){
  * this function should be COMPLETE
  */
 
-/*
-function createBoxList(rows){
+
+function createBoxList(rows: number[][]){
 
     const box_table = [];
 
@@ -131,7 +123,7 @@ function createBoxList(rows){
     return box_table; //return the box table
 }
 
-*/
+
 
 /**
  * The purpose of this function is to see if there is an available space we can fill in a number
@@ -150,14 +142,14 @@ function createBoxList(rows){
  * @param {*} columns - the 2D array of columns to check vertically adjacent boxes
  */
 
-/*
-function checkForAvailableSpace(box, rows, columns){
+
+function checkForAvailableSpace(box: Box, rows: number[][], columns: number[][]){
 
     for (let i = 0; i < box.numsLeft.length; i++){
 
         const num = box.numsLeft[i];
 
-        let spaceIndexes = [];
+        let spaceIndexes: number[][] = [];
 
         //check to see what available spaces we have in the box for the number. First check the rows.
         if (!rows[box.adjRow1].includes(num)){
@@ -200,7 +192,6 @@ function checkForAvailableSpace(box, rows, columns){
     }
 }
 
-*/
 
 /**\
  * This method is used when we can't find any spaces to fill in a number with the usual way of going through
@@ -213,8 +204,8 @@ function checkForAvailableSpace(box, rows, columns){
  * column that already has the number. The number is filled when only one possible space remains for the number. 
  */
 
-/*
-function checkRowsAndColumnsForSpaces(rows, columns, box_table){
+
+function checkRowsAndColumnsForSpaces(rows: number[][], columns: number[][], box_table: Box[]){
     
     //first go through every row
     for (let i = 0; i < 9; i++){
@@ -311,4 +302,3 @@ function checkRowsAndColumnsForSpaces(rows, columns, box_table){
 
     }
 }
-*/
