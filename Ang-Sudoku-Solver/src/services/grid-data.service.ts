@@ -16,6 +16,9 @@ export class GridDataService {
   //subject to alert SpaceComponent to change its class depending on if value violates sudoku rule
   private spaceValiditySubject = new Subject<{row: number, column: number, valid: boolean}>();
   spaceValidityStream = this.spaceValiditySubject.asObservable();
+
+  private clearSpacesSubject = new Subject<boolean>();
+  clearSpacesStream = this.clearSpacesSubject.asObservable();
   
   //send the updated space value to the BoardComponent and the coords
   updateValue(box: number, row: number, column: number, value: number) {
@@ -25,6 +28,11 @@ export class GridDataService {
   //if duplicate numbers appear or disappear in rows/cols, update corresponding SpaceComponents
   updateValidity(row: number, column: number, valid: boolean){
     this.spaceValiditySubject.next({row, column, valid});
+  }
+
+  clearSpaces() {
+    this.invalidSpaceCounter = 0;
+    this.clearSpacesSubject.next(true);
   }
 
   increaseCounter() {

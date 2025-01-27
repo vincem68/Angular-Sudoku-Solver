@@ -31,6 +31,11 @@ export class SpaceComponent implements AfterViewInit {
           this.isValid = signal.valid;
         }
       });
+
+      this.gridData.clearSpacesStream.subscribe(signal => {
+        this.isValid = signal;
+        this.value = "";
+      });
   }
 
   //update the grid here, check to make sure empty strings send 0s or that we don't exceed 1 digit

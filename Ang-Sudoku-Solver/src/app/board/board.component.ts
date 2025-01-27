@@ -141,5 +141,16 @@ export class BoardComponent implements AfterViewInit {
     this.columns[col][row] = value;
   }
 
-  //link the function from the solve file
+  clearBoard() {
+    //empty the grids and bx lists
+    for (let i = 0; i < 9; i++){
+      this.boxes[i] = [];
+      for (let j = 0; j < 9; j++){
+        this.rows[i][j] = 0;
+        this.columns[i][j] = 0;
+      }
+    }
+    //send signal to SpaceComponents to clear value and become valid space
+    this.gridData.clearSpaces();
+  }
 }
