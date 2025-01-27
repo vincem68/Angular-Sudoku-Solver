@@ -1,3 +1,8 @@
-div > h1 {
-    align-self: center;
+h3 {
+    margin-inline: 25%;
 }
+
+h1 {
+    margin-inline: 40%;
+}
+

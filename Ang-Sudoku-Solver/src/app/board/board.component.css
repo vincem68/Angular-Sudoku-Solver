@@ -1,9 +1,16 @@
 
 button {
-    background-color: red;
-    color: black;
+    background-color: green;
+    color: white;
     margin: 15px;
     justify-items: center;
+    padding: 20px;
+    border-radius: 100%;
+    transition-duration: 0.5s;
+}
+
+button:hover {
+    background-color: yellowgreen;
 }
 
 .boardSection {
