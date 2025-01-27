@@ -26,7 +26,7 @@ export class SpaceComponent implements AfterViewInit {
   constructor(private gridData: GridDataService){ }
 
   ngAfterViewInit(): void {
-      this.gridData.updatedSpaceValidity.subscribe(signal => {
+      this.gridData.spaceValidityStream.subscribe(signal => {
         if (signal.row == this.gridCoords[1] && signal.column == this.gridCoords[2]){
           this.isValid = signal.valid;
         }

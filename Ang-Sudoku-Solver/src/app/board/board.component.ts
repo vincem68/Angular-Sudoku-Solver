@@ -1,7 +1,7 @@
 import { Component, AfterViewInit, QueryList, ViewChildren } from '@angular/core';
 import { BoxComponent } from './box/box.component';
 import { GridDataService } from '../../services/grid-data.service';
-import { Subject } from 'rxjs';
+import SpaceCoords from '../../classes/SpaceCoords';
 
 @Component({
   selector: 'board',
@@ -13,6 +13,8 @@ export class BoardComponent implements AfterViewInit {
 
   constructor(private gridData: GridDataService){}
 
+  //the overall values of every grid space are stored here for checking if there are repeat numbers
+  //in rows, used for the overall solving and as the main grid values
   rows: number[][] = [
     [0,0,0,0,0,0,0,0,0],
     [0,0,0,0,0,0,0,0,0],
@@ -25,6 +27,8 @@ export class BoardComponent implements AfterViewInit {
     [0,0,0,0,0,0,0,0,0]
   ];
 
+
+  //the transpose of rows, updated alongside the rows array. Represents values in columns for easier lookup
   columns: number[][] = [
     [0,0,0,0,0,0,0,0,0],
     [0,0,0,0,0,0,0,0,0],
@@ -37,14 +41,19 @@ export class BoardComponent implements AfterViewInit {
     [0,0,0,0,0,0,0,0,0]
   ];
 
+  //list of lists that each hold a SpaceCoords object. Each index represents one of the 9 boxes on the board.
+  //whenever we add a space, make SpaceCoords object and put it in its box index
+  //ex: add nonzero number at space 0,0 (very top left), add space at boxes[0] for box 0 that holds coords
+  boxes: SpaceCoords[][] = [[],[],[],[],[],[],[],[],[]];
+
   ngAfterViewInit(): void {
   
-    this.gridData.updatedSpaceValue.subscribe(coords => {
+    this.gridData.spaceValueStream.subscribe(coords => {
       //call function based on if we're emptying or filling a space
       if (coords.value == 0){
-        this.emptyingSpace(coords.row, coords.column);
+        this.emptyingSpace(coords.box, coords.row, coords.column);
       } else {
-        this.fillingSpace(coords.row, coords.column, coords.value);
+        this.fillingSpace(coords.box, coords.row, coords.column, coords.value);
       }
     });
   }
@@ -53,70 +62,81 @@ export class BoardComponent implements AfterViewInit {
    * When ngModelChange is called and we make a space empty, call this to see if we need to update any
    * spaces to be valid if that space contains the same number and there's no more than 2 occurrances
    * in both the row and column
-   * @param row 
-   * @param col 
    */
-  emptyingSpace(row: number, col: number){
+  emptyingSpace(box: number, row: number, col: number){
     //get previous value in space about to be changed
     const prevValue = this.rows[row][col];
 
-    //make space empty
+    //make space empty in both grids
     this.rows[row][col] = 0;
     this.columns[col][row] = 0;
 
-    //see if there is a duplicate in row already
-    let duplicate = this.rows[row].indexOf(prevValue);
-    if (duplicate != -1){
-      //if there is, see if there's a second duplicate in row
-      let secondDuplicate = (duplicate == 8) ? -1 : this.rows[row].indexOf(prevValue, duplicate + 1);
-      if (secondDuplicate == -1) { //if not, check that column if there's more than 1 occurrence
-        let change = true;
-        for (let i = 0; i < 9; i++){
-          if (this.columns[duplicate][i] == prevValue && i != row){
-            change = false;
-          }
-        }
-        if (change){ //make space valid if just one occurrence in column
-          this.gridData.updateSpaceValidity(row, duplicate, true);
-        }
+    //remove space from the boxes list
+    this.boxes[box].splice(this.boxes[box].findIndex(space => space.row == row && space.col == col), 1);
+    
+    //see if there is 1 duplicate in row 
+    if (this.rows[row].filter(value => value == prevValue).length == 1){
+      //get column index and box index of it if yes
+      const dupColIndex = this.rows[row].indexOf(prevValue);
+      const dupBoxIndex = 3 * (Math.floor(row / 3)) + Math.floor(dupColIndex / 3);
+      //check if also only instance of value in column and box
+      if (this.columns[dupColIndex].filter(value => value == prevValue).length == 1 && 
+        this.boxes[dupBoxIndex].filter(space => this.rows[space.row][space.col] == prevValue).length == 1){
+          //make space valid if no duplicates in box or column
+        this.gridData.updateValidity(row, dupColIndex, true);
       }
     }
-    //now do the same for the columns
-    duplicate = this.columns[col].indexOf(prevValue);
-    if (duplicate != -1) {
-      let secondDuplicate = (duplicate == 8) ? -1 : this.columns[col].indexOf(prevValue, duplicate + 1);
-      if (secondDuplicate == -1) { 
-        let change = true;
-        for (let i = 0; i < 9; i++){
-          if (this.rows[duplicate][i] == prevValue && i != col){
-            change = false;
-          }
-        }
-        if (change){ 
-          this.gridData.updateSpaceValidity(duplicate, col, true);
-        }
+
+    //see if 1 duplicate value in column
+    if (this.columns[col].filter(value => value == prevValue).length == 1){
+      //get row index of it if yes
+      const dupRowIndex = this.columns[col].indexOf(prevValue);
+      const dupBoxIndex = 3 * (Math.floor(dupRowIndex / 3)) + Math.floor(col / 3);
+      //check if also only instance of value in row and box
+      if (this.rows[dupRowIndex].filter(value => value == prevValue).length == 1 && 
+        this.boxes[dupBoxIndex].filter(space => this.rows[space.row][space.col] == prevValue).length == 1){
+          //space is valid if no others found
+        this.gridData.updateValidity(dupRowIndex, col, true);
+      }
+    }
+
+    //now finally check if 1 duplicate row in Box
+    if (this.boxes[box].filter(space => this.rows[space.row][space.col] == prevValue).length == 1){
+      const space: any = this.boxes[box].find(space => this.rows[space.row][space.col] == prevValue);
+      //check its row and column if other duplicates are found if there's one in the box
+      if (this.rows[space.row].filter(value => value == prevValue).length == 1 && 
+        this.columns[space.col].filter(value => value == prevValue).length == 1){
+        //make space valid if no duplicates
+        this.gridData.updateValidity(space.row, space.col, true);
       }
     }
   }
 
 
-  fillingSpace(row: number, col: number, value: number){
+  fillingSpace(box: number, row: number, col: number, value: number){
 
     //see if there is occurrence of number in row already
-    let duplicate = this.rows[row].indexOf(value);
-    if (duplicate != -1){ //if yes, make both spaces invalid
-      this.gridData.updateSpaceValidity(row, duplicate, false);
-      this.gridData.updateSpaceValidity(row, col, false);
+    if (this.rows[row].indexOf(value) != -1){ //if yes, make both spaces invalid
+      this.gridData.updateValidity(row, this.rows[row].indexOf(value), false);
+      this.gridData.updateValidity(row, col, false);
     }
 
     //now check in columns
-    duplicate = this.columns[col].indexOf(value);
-    if (duplicate != -1){
-      this.gridData.updateSpaceValidity(duplicate, col, false);
-      this.gridData.updateSpaceValidity(row, col, false);
+    if (this.columns[col].indexOf(value) != -1){
+      this.gridData.updateValidity(this.columns[col].indexOf(value), col, false);
+      this.gridData.updateValidity(row, col, false);
     }
 
-    //finally, update the grid
+    //check box
+    if (this.boxes[box].filter(space => this.rows[space.row][space.col] == value).length > 0){
+      this.gridData.updateValidity(row, col, false);
+      const duplicate: any = this.boxes[box].find(space => this.rows[space.row][space.col] == value);
+      this.gridData.updateValidity(duplicate.row, duplicate.col, false);
+    }
+    //add to box list
+    this.boxes[box].push(new SpaceCoords(row, col));
+
+    //finally, update the grids
     this.rows[row][col] = value;
     this.columns[col][row] = value;
   }

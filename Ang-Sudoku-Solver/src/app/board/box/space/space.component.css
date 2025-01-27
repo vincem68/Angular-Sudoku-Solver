@@ -27,6 +27,14 @@ p {
     background-color: white;
 }
 
+.validSpace > input[type=text] {
+    background-color: white;
+}
+
 .invalidSpace {
+    background-color: red;
+}
+
+.invalidSpace > input[type=text] {
     background-color: red;
 }
