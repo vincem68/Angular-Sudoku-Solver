@@ -160,7 +160,10 @@ export class BoardComponent implements AfterViewInit {
     solve(this.rows, this.columns);
     for (let i = 0; i < 9; i++){
       for (let j = 0; j < 9; j++){
-        this.boxes[3 * (Math.floor(i / 3)) + Math.floor(j / 3)].push(new SpaceCoords(i, j));
+        const boxIndex = 3 * (Math.floor(i / 3)) + Math.floor(j / 3);
+        if (this.boxes[boxIndex].findIndex(space => space.row == i && space.col == j) == -1){
+          this.boxes[boxIndex].push(new SpaceCoords(i, j));
+        }
         this.gridData.fillOutFinishedGrid(i, j, this.rows[i][j]);
       }
     }
