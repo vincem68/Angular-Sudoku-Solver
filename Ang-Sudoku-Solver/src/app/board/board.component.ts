@@ -3,6 +3,7 @@ import { BoxComponent } from './box/box.component';
 import { GridDataService } from '../../services/grid-data.service';
 import SpaceCoords from '../../classes/SpaceCoords';
 import solve from '../../solve';
+import prepareSolve from '../../solve3';
 
 @Component({
   selector: 'board',
@@ -156,8 +157,8 @@ export class BoardComponent implements AfterViewInit {
   }
 
   solveGrid() {
-    //gotta do something here with the box list
-    solve(this.rows, this.columns);
+    
+    prepareSolve(this.rows, this.columns);
     for (let i = 0; i < 9; i++){
       for (let j = 0; j < 9; j++){
         const boxIndex = 3 * (Math.floor(i / 3)) + Math.floor(j / 3);
