@@ -1,6 +1,5 @@
 import { Component, Input, AfterViewInit } from '@angular/core';
 import { SpaceComponent } from './space/space.component';
-import { GridDataService } from '../../../services/grid-data.service';
 
 @Component({
   selector: 'box',
@@ -8,7 +7,7 @@ import { GridDataService } from '../../../services/grid-data.service';
   templateUrl: './box.component.html',
   styleUrl: './box.component.css'
 })
-export class BoxComponent implements AfterViewInit {
+export class BoxComponent {
 
   /**
    * Each Box component will have these vars that contains their adjacent indexes in the overall grid.
@@ -27,13 +26,5 @@ export class BoxComponent implements AfterViewInit {
   @Input() boxIndex!: number;
   @Input() rowIndexes!: number[];
   @Input() columnIndexes!: number[];
-
-  constructor(private gridData: GridDataService) {}
-
-  subGridIndex: number[][][] = [[],[],[],[],[],[],[],[],[]];
-
-  ngAfterViewInit(): void {
-      
-  }
 
 }

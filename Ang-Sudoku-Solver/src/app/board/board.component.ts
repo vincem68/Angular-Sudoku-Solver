@@ -1,9 +1,8 @@
 import { Component, AfterViewInit } from '@angular/core';
 import { BoxComponent } from './box/box.component';
-import { GridDataService } from '../../services/grid-data.service';
 import SpaceCoords from '../../classes/SpaceCoords';
-import solve from '../../solve';
-import prepareSolve from '../../solve3';
+import prepareSolve from '../../solve';
+import { GridDataService } from '../../services/grid-data.service';
 
 @Component({
   selector: 'board',
