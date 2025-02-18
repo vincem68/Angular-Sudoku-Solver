@@ -5,6 +5,11 @@ div {
     height: 50px;
     display: inline-flex;
     margin: 0%;
+    transition-duration: 0.5s;
+}
+
+div:hover, input[type=text]:hover {
+    background-color: aqua;
 }
 
 input[type=text] {
@@ -13,6 +18,7 @@ input[type=text] {
     align-self: center;
     width: 40px;
     height: 40px;
+    transition-duration: 0.5s;
 }
 
 p {
@@ -21,6 +27,7 @@ p {
     color:black;
     padding-left: 40%;
     font-size: medium;
+    transition-duration: 0.5s;
 }
 
 .validSpace {
