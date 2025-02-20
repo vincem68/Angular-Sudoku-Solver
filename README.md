@@ -1,8 +1,5 @@
-# This repo contains code for a new and improved version of the Sudoku Solver porject in the Sudoku-Solver repo. 
+# This is a solo project about solving Sudoku puzzles. 
 
+The page displays a 9x9 Sudoku grid allowing the user to fill in the spaces with whatever numbers 1-9 they desire. When the Solve button is clicked, the program will solve the puzzle and display the solution within the grid. The project utilizes Angular principles such as components and services to have the spaces communicate with each other whenever a number is entered into the board. Spaces automatically update themselves to be red (invalid) or white (valid) depending on if numbers entered either go against or comply with the rules of Sudoku (no duplicate numbers in rows, columns or 3x3 boxes).
 
-**The main differences in this project are:**
-
--- This project utilizes the AngularJS framework to have the code divided into components and services for better organization and more reactive elements and features. Logic and HTML is further broken down by component
-
--- This project uses Typescript as opposed to Javascript
+# This project was made in AngularJS, Typescript, HMTL and CSS. 
