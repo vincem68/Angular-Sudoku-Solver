@@ -28,6 +28,12 @@ export class SpaceComponent implements AfterViewInit {
   ngAfterViewInit(): void {
       this.gridData.spaceValidityStream.subscribe(signal => {
         if (signal.row == this.gridCoords[1] && signal.column == this.gridCoords[2]){
+          if (this.isValid == true && signal.valid == false){
+            this.gridData.increaseInvalidSpaceCounter();
+          }
+          if (this.isValid == false && signal.valid == true){
+            this.gridData.decreaseInvalidSpaceCounter();
+          }
           this.isValid = signal.valid;
         }
       });
@@ -37,7 +43,7 @@ export class SpaceComponent implements AfterViewInit {
         this.value = "";
       });
 
-      this.gridData.finishedGridStream.subscribe(signal => {
+      this.gridData.updateGridStream.subscribe(signal => {
         if (this.gridCoords[1] == signal.row && this.gridCoords[2] == signal.col) {
           this.value = signal.value.toString();
         }
@@ -46,11 +52,13 @@ export class SpaceComponent implements AfterViewInit {
 
   //update the grid here, check to make sure empty strings send 0s or that we don't exceed 1 digit
   update(): void {
-    if (Number.isNaN(Number(this.value))){
+    if (Number.isNaN(Number(this.value)) || this.value == "0"){ //take care of inputs not 1-9
       this.value = "";
+      return;
     }
-    if (this.value == ""){
+    if (this.value == ""){ //if empty space then always valid
       this.isValid = true;
+      this.gridData.decreaseInvalidSpaceCounter();
     }
     const numValue = (this.value == "") ? 0 : Number(this.value);
     this.gridData.updateValue(this.gridCoords[0], this.gridCoords[1], this.gridCoords[2], numValue);

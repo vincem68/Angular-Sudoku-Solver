@@ -18,7 +18,7 @@ input[type=text] {
     align-self: center;
     width: 40px;
     height: 40px;
-    transition-duration: 0.5s;
+    transition-duration: 0.7s;
 }
 
 p {
@@ -27,7 +27,6 @@ p {
     color:black;
     padding-left: 40%;
     font-size: medium;
-    transition-duration: 0.5s;
 }
 
 .validSpace {

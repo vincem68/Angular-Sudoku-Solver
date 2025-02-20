@@ -13,6 +13,10 @@ button:hover {
     background-color: yellowgreen;
 }
 
+button:disabled {
+    background-color: crimson;
+}
+
 .boardSection {
     display: flex;
     justify-content: center;

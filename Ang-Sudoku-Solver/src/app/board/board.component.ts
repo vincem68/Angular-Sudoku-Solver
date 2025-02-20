@@ -47,6 +47,8 @@ export class BoardComponent implements AfterViewInit {
   //ex: add nonzero number at space 0,0 (very top left), add space at boxes[0] for box 0 that holds coords
   boxes: SpaceCoords[][] = [[],[],[],[],[],[],[],[],[]];
 
+  buttonDisabled: boolean = false; //property to make Solve button disabled or not
+
   ngAfterViewInit(): void {
   
     this.gridData.spaceValueStream.subscribe(coords => {
@@ -56,6 +58,10 @@ export class BoardComponent implements AfterViewInit {
       } else {
         this.fillingSpace(coords.box, coords.row, coords.column, coords.value);
       }
+
+      if (this.gridData.getInvalidSpaceCounter() > 0){ 
+        this.buttonDisabled = true; 
+      } else { this.buttonDisabled = false;}
     });
   }
 
@@ -85,6 +91,7 @@ export class BoardComponent implements AfterViewInit {
         this.boxes[dupBoxIndex].filter(space => this.rows[space.row][space.col] == prevValue).length == 1){
           //make space valid if no duplicates in box or column
         this.gridData.updateValidity(row, dupColIndex, true);
+        //this.gridData.decreaseCounter();
       }
     }
 
@@ -98,6 +105,7 @@ export class BoardComponent implements AfterViewInit {
         this.boxes[dupBoxIndex].filter(space => this.rows[space.row][space.col] == prevValue).length == 1){
           //space is valid if no others found
         this.gridData.updateValidity(dupRowIndex, col, true);
+        //this.gridData.decreaseCounter();
       }
     }
 
@@ -109,23 +117,30 @@ export class BoardComponent implements AfterViewInit {
         this.columns[space.col].filter(value => value == prevValue).length == 1){
         //make space valid if no duplicates
         this.gridData.updateValidity(space.row, space.col, true);
+        //this.gridData.decreaseCounter();
       }
     }
   }
 
 
+  /**
+   * Method called when a SpaceComponent goes from empty to having a value. Checks the row, column and
+   * box of the SpaceComponent to see if there are duplicate numbers and makes them invalid if so
+   */
   fillingSpace(box: number, row: number, col: number, value: number){
 
     //see if there is occurrence of number in row already
     if (this.rows[row].indexOf(value) != -1){ //if yes, make both spaces invalid
       this.gridData.updateValidity(row, this.rows[row].indexOf(value), false);
       this.gridData.updateValidity(row, col, false);
+      //this.gridData.increaseCounter();
     }
 
     //now check in columns
     if (this.columns[col].indexOf(value) != -1){
       this.gridData.updateValidity(this.columns[col].indexOf(value), col, false);
       this.gridData.updateValidity(row, col, false);
+      //this.gridData.increaseCounter();
     }
 
     //check box
@@ -142,6 +157,10 @@ export class BoardComponent implements AfterViewInit {
     this.columns[col][row] = value;
   }
 
+  /**
+   * When Clear Board button is clicked, send signal to all SpaceComponents to empty values and become
+   * valid (white) spaces
+   */
   clearBoard() {
     //empty the grids and bx lists
     for (let i = 0; i < 9; i++){
@@ -153,8 +172,15 @@ export class BoardComponent implements AfterViewInit {
     }
     //send signal to SpaceComponents to clear value and become valid space
     this.gridData.clearSpaces();
+    this.buttonDisabled = false;
   }
 
+
+  /**
+   * When the Solve Puzzle button is clicked, prepareSolve is called from a separate file to solve
+   * the puzzle. We get the resulting rows and columns arrays as solutions and populate
+   * the grid with the solution.
+   */
   solveGrid() {
     
     prepareSolve(this.rows, this.columns);
@@ -164,7 +190,7 @@ export class BoardComponent implements AfterViewInit {
         if (this.boxes[boxIndex].findIndex(space => space.row == i && space.col == j) == -1){
           this.boxes[boxIndex].push(new SpaceCoords(i, j));
         }
-        this.gridData.fillOutFinishedGrid(i, j, this.rows[i][j]);
+        this.gridData.fillOutGrid(i, j, this.rows[i][j]);
       }
     }
 

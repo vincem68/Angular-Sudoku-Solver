@@ -22,15 +22,15 @@ export class GridDataService {
   clearSpacesStream = this.clearSpacesSubject.asObservable();
 
   //subject to get finished grid values to their corresponding spaces
-  private finishedGridSubject = new Subject<{row: number, col: number, value: number}>();
-  finishedGridStream = this.finishedGridSubject.asObservable();
+  private updateGridSubject = new Subject<{row: number, col: number, value: number}>();
+  updateGridStream = this.updateGridSubject.asObservable();
   
   //send the updated space value to the BoardComponent and the coords
   updateValue(box: number, row: number, column: number, value: number) {
     this.spaceValueSubject.next({box, row, column, value});
   }
 
-  //if duplicate numbers appear or disappear in rows/cols, update corresponding SpaceComponents
+  //update a specific space's validity if its space changes or its affected by space in box/row/column
   updateValidity(row: number, column: number, valid: boolean){
     this.spaceValiditySubject.next({row, column, valid});
   }
@@ -42,19 +42,23 @@ export class GridDataService {
   }
 
   //send out values from finished grid
-  fillOutFinishedGrid(row: number, col: number, value: number) {
-    this.finishedGridSubject.next({row, col, value});
+  fillOutGrid(row: number, col: number, value: number) {
+    this.invalidSpaceCounter = 0;
+    this.updateGridSubject.next({row, col, value});
   }
 
-  increaseCounter() {
-    this.invalidSpaceCounter++;
-  }
-
-  decreaseCounter() {
+  decreaseInvalidSpaceCounter() {
     this.invalidSpaceCounter--;
+    console.log(this.invalidSpaceCounter);
   }
 
-  getCounter() {
+  increaseInvalidSpaceCounter() {
+    this.invalidSpaceCounter++;
+    console.log(this.invalidSpaceCounter);
+  }
+
+  //return number of invalid (red) spaces
+  getInvalidSpaceCounter() {
     return this.invalidSpaceCounter;
   }
 }
