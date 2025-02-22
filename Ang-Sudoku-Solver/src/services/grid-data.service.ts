@@ -37,26 +37,25 @@ export class GridDataService {
 
   //send signal to clear all spaces
   clearSpaces() {
-    this.invalidSpaceCounter = 0;
     this.clearSpacesSubject.next(true);
   }
 
   //send out values from finished grid
   fillOutGrid(row: number, col: number, value: number) {
-    this.invalidSpaceCounter = 0;
     this.updateGridSubject.next({row, col, value});
   }
 
   decreaseInvalidSpaceCounter() {
     this.invalidSpaceCounter--;
-    console.log(this.invalidSpaceCounter);
   }
 
   increaseInvalidSpaceCounter() {
     this.invalidSpaceCounter++;
-    console.log(this.invalidSpaceCounter);
   }
 
+  resetInvalidSpaceCounter() {
+    this.invalidSpaceCounter = 0;
+  }
   //return number of invalid (red) spaces
   getInvalidSpaceCounter() {
     return this.invalidSpaceCounter;

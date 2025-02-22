@@ -91,7 +91,6 @@ export class BoardComponent implements AfterViewInit {
         this.boxes[dupBoxIndex].filter(space => this.rows[space.row][space.col] == prevValue).length == 1){
           //make space valid if no duplicates in box or column
         this.gridData.updateValidity(row, dupColIndex, true);
-        //this.gridData.decreaseCounter();
       }
     }
 
@@ -105,7 +104,6 @@ export class BoardComponent implements AfterViewInit {
         this.boxes[dupBoxIndex].filter(space => this.rows[space.row][space.col] == prevValue).length == 1){
           //space is valid if no others found
         this.gridData.updateValidity(dupRowIndex, col, true);
-        //this.gridData.decreaseCounter();
       }
     }
 
@@ -117,7 +115,6 @@ export class BoardComponent implements AfterViewInit {
         this.columns[space.col].filter(value => value == prevValue).length == 1){
         //make space valid if no duplicates
         this.gridData.updateValidity(space.row, space.col, true);
-        //this.gridData.decreaseCounter();
       }
     }
   }
@@ -133,14 +130,12 @@ export class BoardComponent implements AfterViewInit {
     if (this.rows[row].indexOf(value) != -1){ //if yes, make both spaces invalid
       this.gridData.updateValidity(row, this.rows[row].indexOf(value), false);
       this.gridData.updateValidity(row, col, false);
-      //this.gridData.increaseCounter();
     }
 
     //now check in columns
     if (this.columns[col].indexOf(value) != -1){
       this.gridData.updateValidity(this.columns[col].indexOf(value), col, false);
       this.gridData.updateValidity(row, col, false);
-      //this.gridData.increaseCounter();
     }
 
     //check box
@@ -162,6 +157,7 @@ export class BoardComponent implements AfterViewInit {
    * valid (white) spaces
    */
   clearBoard() {
+    this.gridData.resetInvalidSpaceCounter();
     //empty the grids and bx lists
     for (let i = 0; i < 9; i++){
       this.boxes[i] = [];
@@ -175,6 +171,25 @@ export class BoardComponent implements AfterViewInit {
     this.buttonDisabled = false;
   }
 
+  async getPuzzle() {
+    this.gridData.resetInvalidSpaceCounter();
+    //get the response puzzle
+    const response: Response = await fetch("https://sudoku-api.vercel.app/api/dosuku?query={newboard(limit:1){grids{value}}}");
+    const obj = await response.json();
+    const puzzle = obj.newboard.grids[0].value; //get the 2D array portion of response
+    //clear the boxValues list
+    this.boxes = [[],[],[],[],[],[],[],[],[]]; //empty boxes list since we're throwing away previous values
+    for (let i = 0; i < 9; i++){
+      for (let j = 0; j < 9; j++){
+        //fill up property grids with new puzzle values
+        this.rows[i][j] = puzzle[i][j];
+        this.columns[j][i] = puzzle[j][i];
+        this.boxes[3 * (Math.floor(i / 3)) + Math.floor(j / 3)].push(new SpaceCoords(i, j));
+        this.gridData.fillOutGrid(i, j, puzzle[i][j]); //change SpaceComponent value
+      }
+    }
+  }
+
 
   /**
    * When the Solve Puzzle button is clicked, prepareSolve is called from a separate file to solve
@@ -182,8 +197,9 @@ export class BoardComponent implements AfterViewInit {
    * the grid with the solution.
    */
   solveGrid() {
-    
+    //solve puzzle
     prepareSolve(this.rows, this.columns);
+    //populate grid properties with solution
     for (let i = 0; i < 9; i++){
       for (let j = 0; j < 9; j++){
         const boxIndex = 3 * (Math.floor(i / 3)) + Math.floor(j / 3);
