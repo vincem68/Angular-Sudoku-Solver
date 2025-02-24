@@ -183,8 +183,10 @@ export class BoardComponent implements AfterViewInit {
       for (let j = 0; j < 9; j++){
         //fill up property grids with new puzzle values
         this.rows[i][j] = puzzle[i][j];
-        this.columns[j][i] = puzzle[j][i];
-        this.boxes[3 * (Math.floor(i / 3)) + Math.floor(j / 3)].push(new SpaceCoords(i, j));
+        this.columns[j][i] = puzzle[i][j];
+        if (puzzle[i][j] != 0) { //if nonzero value add it to box list
+          this.boxes[3 * (Math.floor(i / 3)) + Math.floor(j / 3)].push(new SpaceCoords(i, j));
+        }
         this.gridData.fillOutGrid(i, j, puzzle[i][j]); //change SpaceComponent value
       }
     }
