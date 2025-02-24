@@ -57,9 +57,9 @@ export class SpaceComponent implements AfterViewInit {
       return;
     }
     if (this.value == ""){ //if empty space then always valid
+      if (this.isValid == false){ this.gridData.decreaseInvalidSpaceCounter(); }
       this.isValid = true;
-      this.gridData.decreaseInvalidSpaceCounter();
-    }
+    } 
     const numValue = (this.value == "") ? 0 : Number(this.value);
     this.gridData.updateValue(this.gridCoords[0], this.gridCoords[1], this.gridCoords[2], numValue);
   }

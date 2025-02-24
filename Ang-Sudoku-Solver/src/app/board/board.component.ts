@@ -47,7 +47,7 @@ export class BoardComponent implements AfterViewInit {
   //ex: add nonzero number at space 0,0 (very top left), add space at boxes[0] for box 0 that holds coords
   boxes: SpaceCoords[][] = [[],[],[],[],[],[],[],[],[]];
 
-  buttonDisabled: boolean = false; //property to make Solve button disabled or not
+  buttonDisabled: boolean = true; //property to make Solve button disabled or not
 
   ngAfterViewInit(): void {
   
@@ -58,10 +58,10 @@ export class BoardComponent implements AfterViewInit {
       } else {
         this.fillingSpace(coords.box, coords.row, coords.column, coords.value);
       }
-
-      if (this.gridData.getInvalidSpaceCounter() > 0){ 
-        this.buttonDisabled = true; 
-      } else { this.buttonDisabled = false;}
+      //disable button if less than 17 spaces filled or there's invalid spaces
+      if (this.gridData.getInvalidSpaceCounter() == 0 && this.gridData.getSpaceCounter() >= 17){ 
+        this.buttonDisabled = false; 
+      } else { this.buttonDisabled = true;}
     });
   }
 
@@ -71,6 +71,8 @@ export class BoardComponent implements AfterViewInit {
    * in both the row and column
    */
   emptyingSpace(box: number, row: number, col: number){
+
+    this.gridData.decreaseSpaceCounter();
     //get previous value in space about to be changed
     const prevValue = this.rows[row][col];
 
@@ -129,6 +131,8 @@ export class BoardComponent implements AfterViewInit {
    */
   fillingSpace(box: number, row: number, col: number, value: number){
 
+    this.gridData.increaseSpaceCounter();
+
     //see if there is occurrence of number in row already
     if (this.rows[row].indexOf(value) != -1){ //if yes, make both spaces invalid
       this.gridData.updateValidity(row, this.rows[row].indexOf(value), false);
@@ -162,6 +166,7 @@ export class BoardComponent implements AfterViewInit {
    * valid (white) spaces
    */
   clearBoard() {
+    this.gridData.setSpaceCounter(0); //set spaces filled to 0
     //empty the grids and bx lists
     for (let i = 0; i < 9; i++){
       this.boxes[i] = [];
@@ -172,7 +177,7 @@ export class BoardComponent implements AfterViewInit {
     }
     //send signal to SpaceComponents to clear value and become valid space
     this.gridData.clearSpaces();
-    this.buttonDisabled = false;
+    this.buttonDisabled = true;
   }
 
 
@@ -182,7 +187,7 @@ export class BoardComponent implements AfterViewInit {
    * the grid with the solution.
    */
   solveGrid() {
-    
+    this.gridData.setSpaceCounter(81); //grid will have 81 filled spaces
     prepareSolve(this.rows, this.columns);
     for (let i = 0; i < 9; i++){
       for (let j = 0; j < 9; j++){

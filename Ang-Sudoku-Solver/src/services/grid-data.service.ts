@@ -6,6 +6,8 @@ import { Subject } from 'rxjs';
 })
 export class GridDataService {
 
+  //number of spaces filled in. Need at least 17 numbers filled.
+  spaceCounter: number = 0;
   //keep track of number of invalid spaces so we know when we can't call the solve method
   invalidSpaceCounter: number = 0;
 
@@ -47,11 +49,32 @@ export class GridDataService {
     this.updateGridSubject.next({row, col, value});
   }
 
+  setSpaceCounter(total: number) {
+    this.spaceCounter = total;
+  }
+  
+  //decrease number of filled spaces
+  decreaseSpaceCounter() {
+    this.spaceCounter--;
+  }
+
+  //increase number of filled spacs
+  increaseSpaceCounter() {
+    this.spaceCounter++;
+  }
+
+  //return number of filled spaces
+  getSpaceCounter() {
+    return this.spaceCounter;
+  }
+
+  //decrease number of invalid (red) spaces
   decreaseInvalidSpaceCounter() {
     this.invalidSpaceCounter--;
     console.log(this.invalidSpaceCounter);
   }
 
+  //increase number of invalid (red) spaces
   increaseInvalidSpaceCounter() {
     this.invalidSpaceCounter++;
     console.log(this.invalidSpaceCounter);
