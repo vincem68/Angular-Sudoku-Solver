@@ -27,8 +27,6 @@ export class BoardComponent implements AfterViewInit {
     [0,0,0,0,0,0,0,0,0],
     [0,0,0,0,0,0,0,0,0]
   ];
-
-
   //the transpose of rows, updated alongside the rows array. Represents values in columns for easier lookup
   columns: number[][] = [
     [0,0,0,0,0,0,0,0,0],
@@ -107,7 +105,6 @@ export class BoardComponent implements AfterViewInit {
         this.boxes[dupBoxIndex].filter(space => this.rows[space.row][space.col] == prevValue).length == 1){
           //space is valid if no others found
         this.gridData.updateValidity(dupRowIndex, col, true);
-        //this.gridData.decreaseCounter();
       }
     }
 
@@ -119,11 +116,9 @@ export class BoardComponent implements AfterViewInit {
         this.columns[space.col].filter(value => value == prevValue).length == 1){
         //make space valid if no duplicates
         this.gridData.updateValidity(space.row, space.col, true);
-        //this.gridData.decreaseCounter();
       }
     }
   }
-
 
   /**
    * Method called when a SpaceComponent goes from empty to having a value. Checks the row, column and
@@ -179,7 +174,6 @@ export class BoardComponent implements AfterViewInit {
     this.gridData.clearSpaces();
     this.buttonDisabled = true;
   }
-
 
   /**
    * When the Solve Puzzle button is clicked, prepareSolve is called from a separate file to solve

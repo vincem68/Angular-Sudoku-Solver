@@ -16,7 +16,7 @@ export default class Space {
     }
 
     removeNum(num: number) {
-        if (this.numsLeft.indexOf(num) != -1 && this.numsLeft.length > 1){
+        if (this.numsLeft.indexOf(num) != -1){
             this.numsLeft.splice(this.numsLeft.indexOf(num), 1);
         }
     }
