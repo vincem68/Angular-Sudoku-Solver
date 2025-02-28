@@ -1,51 +1,6 @@
 import Space from "./classes/Space";
 
-export default function prepareSolve(rows: number[][], columns: number[][]){
-
-    //create the 2D arrays to store the Space objects. 
-    const rowGrid: Space[][] = [[],[],[],[],[],[],[],[],[]]; //2D Space array to store Space objects in Row order (regular grid)
-    const colGrid: Space[][] = [[],[],[],[],[],[],[],[],[]]; //2D grid to store Space objects in Column order
-    const boxGrid: Space[][] = [[],[],[],[],[],[],[],[],[]]; //2D grid to store Space objects in Box order
-    const numsLeftGrid: Space[][] = [[],[],[],[],[],[],[],[],[]]; //2D grid to store Space objects in order of smallest possible value 
-    //remaining (1) to greatest (9)
-
-    //create the Spaces for every value, and add them to the grids. Also put together boxValues 
-    const boxValues: number[][] = [[],[],[],[],[],[],[],[],[]];
-    for (let i = 0; i < 9; i++){
-        for (let j = 0; j < 9; j++){
-
-            const space = new Space(i, j, rows[i][j]);
-            rowGrid[i].push(space);
-            colGrid[j].push(space);
-            boxGrid[space.box].push(space);
-
-            if (rows[i][j] != 0){
-                boxValues[space.box].push(rows[i][j]);
-            }
-
-        }
-    }
-    
-    rowGrid.forEach(row => {
-        row.forEach(space => {
-            if (space.numsLeft.length > 1){ //if space has no value filled
-                space.numsLeft = space.numsLeft.filter(value => !boxValues[space.box].concat(rows[space.row]
-                    .filter(num => num != 0)).concat(columns[space.col].filter(num => num != 0)).includes(value));
-                
-                numsLeftGrid[space.numsLeft.length - 1].push(space);
-            } 
-        });
-    });
-
-    //call solve to find the solution
-    solve(rowGrid, colGrid, boxGrid, numsLeftGrid);
-
-    //populate the numerical rows grid with the final Space values
-    rowGrid.forEach(row => {row.forEach(space => { rows[space.row][space.col] = space.numsLeft[0]; });});
-    colGrid.forEach(col => {col.forEach(space => { columns[space.col][space.row] = space.numsLeft[0]; });});
-}
-
-function solve(rowGrid: Space[][], colGrid: Space[][], boxGrid: Space[][], numsLeftGrid: Space[][]) {
+export default function solve(rowGrid: Space[][], colGrid: Space[][], boxGrid: Space[][], numsLeftGrid: Space[][]) {
 
     while (1) {
         //if numsLeftGrid is completely empty, no more spaces left to fill

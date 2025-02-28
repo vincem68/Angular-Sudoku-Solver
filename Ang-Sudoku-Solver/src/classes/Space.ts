@@ -21,6 +21,10 @@ export default class Space {
         }
     }
 
+    fillValue(value: number) {
+        this.numsLeft = [value];
+    }
+
     static getBoxIndex(row: number, col: number){
         return 3 * Math.floor(row / 3) + Math.floor(col / 3);
     }
