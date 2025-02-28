@@ -160,7 +160,7 @@ export class BoardComponent implements AfterViewInit {
    */
   solveGrid() {
     this.gridData.setSpaceCounter(81); //grid will have 81 filled spaces
-    prepareSolve(this.rows, this.columns);
+    solve(this.rows, this.columns, this.boxes);
     for (let i = 0; i < 9; i++){
       for (let j = 0; j < 9; j++){
         const boxIndex = 3 * (Math.floor(i / 3)) + Math.floor(j / 3);
