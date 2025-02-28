@@ -95,41 +95,45 @@ function solve(rowGrid: Space[][], colGrid: Space[][], boxGrid: Space[][], numsL
                 for (let i = 1; i < 9; i++){ //for every row starting with spaces with 2 values left
                     for (let j = 0; j < numsLeftTable[i].length; j++){ //for every space in index
                         for (let k = 0; k < numsLeftTable[i][j].numsLeft.length; k++){ //for every value left in space
-                            const guess = new Space(numsLeftTable[i][j].row, numsLeftTable[i][j].col, 
-                                numsLeftTable[i][j].numsLeft[k]);
                             //make a copy of the grids for recursive call
                             const dupRowGrid: Space[][] = [[],[],[],[],[],[],[],[],[]];
                             const dupColGrid: Space[][] = [[],[],[],[],[],[],[],[],[]];
                             const dupBoxGrid: Space[][] = [[],[],[],[],[],[],[],[],[]];
                             const dupNumsLeftTable: Space[][] = [[],[],[],[],[],[],[],[],[]];
-                            //put current guess in tables
-                            dupRowGrid[guess.row].push(guess);
-                            dupColGrid[guess.col].push(guess);
-                            dupBoxGrid[guess.box].push(guess);
-                            dupNumsLeftTable[0].push(guess);
                             //fill each grid with duplicate objects
                             rowGrid.forEach(row => {
                                 row.forEach(space => {
-                                    if (space.row != guess.row || space.col != guess.col){
-                                        const newSpace = new Space(space.row, space.col, 0);
-                                        newSpace.numsLeft = space.numsLeft.slice();
-                                        dupRowGrid[newSpace.row].push(newSpace);
-                                        dupColGrid[newSpace.col].push(newSpace);
-                                        dupBoxGrid[newSpace.box].push(newSpace);
-                                        if (newSpace.numsLeft.length > 1) {
-                                            dupNumsLeftTable[newSpace.numsLeft.length - 1].push(newSpace);
-                                        }
+                                    const newSpace = new Space(space.row, space.col, 0);
+                                    newSpace.numsLeft = space.numsLeft.slice();
+                                    dupRowGrid[newSpace.row].push(newSpace);
+                                    dupColGrid[newSpace.col].push(newSpace);
+                                    dupBoxGrid[newSpace.box].push(newSpace);
+                                    if (newSpace.row == numsLeftTable[i][j].row && newSpace.col == numsLeftTable[i][j].col){
+                                        newSpace.numsLeft = [numsLeftTable[i][j].numsLeft[k]];
+                                        dupNumsLeftTable[0].push(newSpace);
+                                    }
+                                    else if (newSpace.numsLeft.length > 1) {
+                                        dupNumsLeftTable[newSpace.numsLeft.length - 1].push(newSpace);
                                     }
                                 });
                             });
                             //recursive call the guess attempt
                             solve(dupRowGrid, dupColGrid, dupBoxGrid, dupNumsLeftTable);
                             //check if finished call resulted in a finished solution without contradictions
-                            if (dupNumsLeftTable.filter(list => list.length > 0).length == 0){
-                                rowGrid = dupRowGrid;
-                                colGrid = dupColGrid;
-                                boxGrid = dupBoxGrid;
-                                numsLeftTable = dupNumsLeftTable;
+                            let finished = true;
+                            dupRowGrid.forEach(row => {
+                                row.forEach(space => {
+                                    if (space.numsLeft.length > 1) { finished = false; }
+                                });
+                            });
+                            if (finished){
+                                for (let i = 0; i < 9; i++){
+                                    for (let j = 0; j < 9; j++){
+                                        rowGrid[i][j] = dupRowGrid[i][j];
+                                        colGrid[i][j] = dupColGrid[i][j];
+                                        boxGrid[i][j] = dupBoxGrid[i][j];
+                                    }
+                                }
                                 return;
                             }
                         }
