@@ -11,7 +11,7 @@ export default function solve(rowGrid: Space[][], colGrid: Space[][], boxGrid: S
         if (numsLeftGrid[0].length > 0) {
 
             const removedSpace = numsLeftGrid[0].pop();
-            const num = removedSpace?.numsLeft[0]!;
+            const num = removedSpace?.value!;
 
             //update the rest of the remaining spaces in the spaceTable, start at 2nd row
             for (let i = 1; i < 9; i++){
