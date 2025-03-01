@@ -4,6 +4,7 @@ export default class Space {
     row: number;
     col: number;
     box: number;
+    value: number = 0;
     numsLeft: number[] = [1,2,3,4,5,6,7,8,9];
 
     constructor(row: number, col: number, value: number) {
@@ -11,7 +12,8 @@ export default class Space {
         this.col = col;
         this.box = 3 * Math.floor(row / 3) + Math.floor(col / 3);
         if (value != 0){
-            this.numsLeft = [value];
+            this.value = value;
+            this.numsLeft = [];
         }
     }
 
@@ -21,7 +23,9 @@ export default class Space {
         }
     }
 
-    static getBoxIndex(row: number, col: number){
-        return 3 * Math.floor(row / 3) + Math.floor(col / 3);
+    fillSpace() {
+        this.value = this.numsLeft[0];
+        this.numsLeft = [];
     }
+
 }

@@ -1,3 +1,4 @@
+import { NumberSymbol } from "@angular/common";
 import Space from "./classes/Space";
 
 export default function prepareSolve(rows: number[][], columns: number[][]){
@@ -36,8 +37,8 @@ export default function prepareSolve(rows: number[][], columns: number[][]){
     //call solve to find the solution
     solve(rowGrid, colGrid, boxGrid, numsLeftTable);
     //populate the numerical rows grid with the final Space values
-    rowGrid.forEach(row => {row.forEach(space => { rows[space.row][space.col] = space.numsLeft[0]; });});
-    colGrid.forEach(col => {col.forEach(space => { columns[space.col][space.row] = space.numsLeft[0]; });});
+    rowGrid.forEach(row => {row.forEach(space => { rows[space.row][space.col] = space.value; });});
+    colGrid.forEach(col => {col.forEach(space => { columns[space.col][space.row] = space.value; });});
 }
 
 /**
@@ -57,19 +58,19 @@ function solve(rowGrid: Space[][], colGrid: Space[][], boxGrid: Space[][], numsL
         //look for any spaces that only have one value left, update adjacent spaces
         if (numsLeftTable[0].length > 0) {
 
-            const removedSpace = numsLeftTable[0].pop();
-            const num = removedSpace?.numsLeft[0]!;
+            const removedSpace = numsLeftTable[0].pop()!;
+            removedSpace.fillSpace();
 
             //update the rest of the remaining spaces in the spaceTable
             for (let i = 0; i < 9; i++){
                 //list that has spaces that lose that num as a possible value
-                const updatedSpaces = numsLeftTable[i].filter(space => space.row == removedSpace?.row 
-                    || space.col == removedSpace?.col || space.box == removedSpace?.box);
+                const updatedSpaces = numsLeftTable[i].filter(space => space.row == removedSpace.row 
+                    || space.col == removedSpace.col || space.box == removedSpace.box);
                 
                 let foundContradiction = false; //if we find a space with no possible values left, invalid
                 updatedSpaces.reverse().forEach(space => { //for each element:
 
-                    space.removeNum(num); //remove the number from its possible value list
+                    space.removeNum(removedSpace.value); //remove the number from its possible value list
 
                     //if the space's numsLeft list is empty, means puzzle is bad or a guess reached dead end
                     if (space.numsLeft.length == 0){
@@ -88,9 +89,9 @@ function solve(rowGrid: Space[][], colGrid: Space[][], boxGrid: Space[][], numsL
             
         } else { //if no spaces remain with only 1 value remaining, narrow down spaces
             //list of spaces that we narrowed down a value for
-            const filledSpaces = narrowDownSpaces(rowGrid, colGrid, boxGrid);
-            //if the list is empty, it means we need to take a guess at a space
-            if (filledSpaces.length == 0){
+            const narrowedSpace = narrowDownSpaces(rowGrid, colGrid, boxGrid);
+            //if no narrowed space, it means we need to take a guess at a space
+            if (!narrowedSpace){
                 //go through every space and their possible values, make guess on recursive call
                 for (let i = 1; i < 9; i++){ //for every row starting with spaces with 2 values left
                     for (let j = 0; j < numsLeftTable[i].length; j++){ //for every space in index
@@ -103,7 +104,7 @@ function solve(rowGrid: Space[][], colGrid: Space[][], boxGrid: Space[][], numsL
                             //fill each grid with duplicate objects
                             rowGrid.forEach(row => {
                                 row.forEach(space => {
-                                    const newSpace = new Space(space.row, space.col, 0);
+                                    const newSpace = new Space(space.row, space.col, space.value);
                                     newSpace.numsLeft = space.numsLeft.slice();
                                     dupRowGrid[newSpace.row].push(newSpace);
                                     dupColGrid[newSpace.col].push(newSpace);
@@ -112,7 +113,7 @@ function solve(rowGrid: Space[][], colGrid: Space[][], boxGrid: Space[][], numsL
                                         newSpace.numsLeft = [numsLeftTable[i][j].numsLeft[k]];
                                         dupNumsLeftTable[0].push(newSpace);
                                     }
-                                    else if (newSpace.numsLeft.length > 1) {
+                                    else if (newSpace.numsLeft.length > 0) {
                                         dupNumsLeftTable[newSpace.numsLeft.length - 1].push(newSpace);
                                     }
                                 });
@@ -141,13 +142,10 @@ function solve(rowGrid: Space[][], colGrid: Space[][], boxGrid: Space[][], numsL
                 }
                 return; //we reached dead end, no recursive calls resulted in valid solution
             }
-            //if we have narrowed down spaces, move them to top index and remove them from current indexes
-            filledSpaces.forEach(spaceInfo => {
-                //remove Space from its initial position in numsLeftGrid and move it to the top
-                numsLeftTable[spaceInfo[0]]
-                    .splice(numsLeftTable[spaceInfo[0]].findIndex(otherSpace => otherSpace === spaceInfo[1]), 1);
-                numsLeftTable[0].push(spaceInfo[1]); //put to top
-            });
+            //if we have narrowed down space, move to top index and remove it from current index
+            numsLeftTable[0].push(narrowedSpace.space);
+            numsLeftTable[narrowedSpace.index].splice(numsLeftTable[narrowedSpace.index]
+                .findIndex(space => space === narrowedSpace.space), 1);
         }
     }
 }
@@ -159,66 +157,59 @@ function solve(rowGrid: Space[][], colGrid: Space[][], boxGrid: Space[][], numsL
  */
 function narrowDownSpaces(rowGrid: Space[][], colGrid: Space[][], boxGrid: Space[][]) {
 
-    //array that holds tuples. Tuples represent the info of spaces to be updated. contains number (index 
-    //of where space initially is in numsLeftGrid) and the Space itself
-    const filledSpaces: [number, Space][] = [];
-
     //go through each box
-    boxGrid.forEach(box => {
+    for (let i = 0; i < 9; i++){
         //filter out the numbers left to be filled in the box
         const unfilledNums = [1,2,3,4,5,6,7,8,9];
-        box.forEach(space => {if (space.numsLeft.length == 1){
-            unfilledNums.splice(unfilledNums.indexOf(space.numsLeft[0]), 1);
+        boxGrid[i].forEach(space => { if (space.value != 0){
+            unfilledNums.splice(unfilledNums.indexOf(space.value), 1);
         }});
-
         //check each unfilled number and see if it only appears in one unfilled space's numsLeft list
-        unfilledNums.forEach(num => {
-            const spaces: Space[] = []; //spaces that include the number as possible value
-            box.forEach(space => {if (space.numsLeft.includes(num)){spaces.push(space);}});
-            if (spaces.length == 1){ //if only one space in box has this num as a possible value, fill it in
-                filledSpaces.push([spaces[0].numsLeft.length - 1, spaces[0]]);
-                spaces[0].numsLeft = [num];
+        for (let j = 0; j < unfilledNums.length; j++){
+            const narrowedSpaces = boxGrid[i].filter(space => space.numsLeft.includes(unfilledNums[j]));
+            if (narrowedSpaces.length == 1){
+                const index = narrowedSpaces[0].numsLeft.length - 1; 
+                narrowedSpaces[0].numsLeft = [unfilledNums[j]];
+                return {"index": index, "space": narrowedSpaces[0]};
             }
-        });
-    });
+        }
+    }
 
     //go through each row
-    rowGrid.forEach(row => {
+    for (let i = 0; i < 9; i++){
         //filter out the numbers left to be filled in the row
         const unfilledNums = [1,2,3,4,5,6,7,8,9];
-        row.forEach(space => {if (space.numsLeft.length == 1){
-            unfilledNums.splice(unfilledNums.indexOf(space.numsLeft[0]), 1);
+        rowGrid[i].forEach(space => { if (space.value != 0){
+            unfilledNums.splice(unfilledNums.indexOf(space.value), 1);
         }});
-
         //check each unfilled number and see if it only appears in one unfilled space's numsLeft list
-        unfilledNums.forEach(num => {
-            const spaces: Space[] = []; //spaces that include the number as possible value
-            row.forEach(space => {if (space.numsLeft.includes(num)){spaces.push(space);}});
-            if (spaces.length == 1){ //if only one space in row has this num as a possible value, fill it in
-                filledSpaces.push([spaces[0].numsLeft.length - 1, spaces[0]]);
-                spaces[0].numsLeft = [num];
+        for (let j = 0; j < unfilledNums.length; j++){
+            const narrowedSpaces = rowGrid[i].filter(space => space.numsLeft.includes(unfilledNums[j]));
+            if (narrowedSpaces.length == 1){
+                const index = narrowedSpaces[0].numsLeft.length - 1; 
+                narrowedSpaces[0].numsLeft = [unfilledNums[j]];
+                return {"index": index, "space": narrowedSpaces[0]};
             }
-        });
-    });
+        }
+    }
 
     //go through each column
-    colGrid.forEach(column => {
+    for (let i = 0; i < 9; i++){
         //filter out the numbers left to be filled in the column
         const unfilledNums = [1,2,3,4,5,6,7,8,9];
-        column.forEach(space => {if (space.numsLeft.length == 1){
-            unfilledNums.splice(unfilledNums.indexOf(space.numsLeft[0]), 1);
+        colGrid[i].forEach(space => { if (space.value != 0){
+            unfilledNums.splice(unfilledNums.indexOf(space.value), 1);
         }});
-
         //check each unfilled number and see if it only appears in one unfilled space's numsLeft list
-        unfilledNums.forEach(num => {
-            const spaces: Space[] = []; //spaces that include the number as possible value
-            column.forEach(space => {if (space.numsLeft.includes(num)){spaces.push(space);}});
-            if (spaces.length == 1){ //if only one space in col has this num as a possible value, fill it in
-                filledSpaces.push([spaces[0].numsLeft.length - 1, spaces[0]]);
-                spaces[0].numsLeft = [num];
+        for (let j = 0; j < unfilledNums.length; j++){
+            const narrowedSpaces = colGrid[i].filter(space => space.numsLeft.includes(unfilledNums[j]));
+            if (narrowedSpaces.length == 1){
+                const index = narrowedSpaces[0].numsLeft.length - 1; 
+                narrowedSpaces[0].numsLeft = [unfilledNums[j]];
+                return {"index": index, "space": narrowedSpaces[0]};
             }
-        });
-    });
+        }
+    }
 
-    return filledSpaces;
+    return null;
 }
