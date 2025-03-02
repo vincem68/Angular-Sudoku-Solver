@@ -13,6 +13,7 @@ export default function prepareSolve(rows: number[][], columns: number[][]){
     const boxValues: number[][] = [[],[],[],[],[],[],[],[],[]];
     for (let i = 0; i < 9; i++){
         for (let j = 0; j < 9; j++){
+            //create and add Space to each grid
             const space = new Space(i, j, rows[i][j]);
             rowGrid[i].push(space);
             colGrid[j].push(space);

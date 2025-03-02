@@ -45,7 +45,8 @@ export class SpaceComponent implements AfterViewInit {
 
       this.gridData.updateGridStream.subscribe(signal => {
         if (this.gridCoords[1] == signal.row && this.gridCoords[2] == signal.col) {
-          this.value = signal.value.toString();
+          this.isValid = true; //whether generating puzzle or getting solution, all spaces are valid
+          this.value = (signal.value == 0) ? "" : signal.value.toString();
         }
       })
   }
