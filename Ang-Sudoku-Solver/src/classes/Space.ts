@@ -1,4 +1,3 @@
-
 export default class Space {
 
     row: number;
@@ -23,9 +22,21 @@ export default class Space {
         }
     }
 
-    fillSpace() {
-        this.value = this.numsLeft[0];
+    fillSpace(value?: number) {
+        this.value = (value) ? value : this.numsLeft[0];
         this.numsLeft = [];
     }
 
+    //add possible value back if Space has filled value
+    addNum(num: number) {
+        if (this.value == 0 && this.numsLeft.indexOf(num) == -1){
+            this.numsLeft.push(num);
+        }
+    }
+
+    //set value to 0, give list of possible values
+    emptySpace(values: number[]) {
+        this.value = 0;
+        this.numsLeft = values;
+    }
 }

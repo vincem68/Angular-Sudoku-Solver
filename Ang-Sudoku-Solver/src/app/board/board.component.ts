@@ -1,8 +1,8 @@
 import { Component, AfterViewInit } from '@angular/core';
 import { BoxComponent } from './box/box.component';
-import SpaceCoords from '../../classes/SpaceCoords';
-import prepareSolve from '../../solve';
 import { GridDataService } from '../../services/grid-data.service';
+import Space from '../../classes/Space';
+import solve from '../../solve';
 
 @Component({
   selector: 'board',
@@ -14,40 +14,27 @@ export class BoardComponent implements AfterViewInit {
 
   constructor(private gridData: GridDataService){}
 
-  //the overall values of every grid space are stored here for checking if there are repeat numbers
-  //in rows, used for the overall solving and as the main grid values
-  rows: number[][] = [
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0]
-  ];
-  //the transpose of rows, updated alongside the rows array. Represents values in columns for easier lookup
-  columns: number[][] = [
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0]
-  ];
 
-  //list of lists that each hold a SpaceCoords object. Each index represents one of the 9 boxes on the board.
-  //whenever we add a space, make SpaceCoords object and put it in its box index
-  //ex: add nonzero number at space 0,0 (very top left), add space at boxes[0] for box 0 that holds coords
-  boxes: SpaceCoords[][] = [[],[],[],[],[],[],[],[],[]];
+  //grid that stores Space objects in row order, seen as the actual corresponding grid
+  rows: Space[][] = [[],[],[],[],[],[],[],[],[]];
+  //transpose of rows grid, for easier column value lookup, stores same objects as rows in column order
+  columns: Space[][] = [[],[],[],[],[],[],[],[],[]];
+  //for easier box value lookup, stores same Space objects on box order
+  boxes: Space[][] = [[],[],[],[],[],[],[],[],[]];
 
   buttonDisabled: boolean = true; //property to make Solve button disabled or not
 
   ngAfterViewInit(): void {
+
+    //popukate grids on initialization, all Space objects have coords and all possible values
+    for (let i = 0; i < 9; i++){
+      for (let j = 0; j < 9; j++){
+        const space = new Space(i, j, 0);
+        this.rows[i].push(space);
+        this.columns[j].push(space);
+        this.boxes[space.box].push(space);
+      }
+    }
   
     this.gridData.spaceValueStream.subscribe(coords => {
       //call function based on if we're emptying or filling a space
@@ -72,50 +59,61 @@ export class BoardComponent implements AfterViewInit {
 
     this.gridData.decreaseSpaceCounter();
     //get previous value in space about to be changed
-    const prevValue = this.rows[row][col];
-
-    //make space empty in both grids
-    this.rows[row][col] = 0;
-    this.columns[col][row] = 0;
-
-    //remove space from the boxes list
-    this.boxes[box].splice(this.boxes[box].findIndex(space => space.row == row && space.col == col), 1);
+    const prevValue = this.rows[row][col].value;
+    //make space empty and update its numsLeft list
+    const filledValues: number[] = [];
+    this.rows[row].forEach(space => { if (space.value != 0){ filledValues.push(space.value);}});
+    this.columns[col].forEach(space => { if (space.value != 0){ filledValues.push(space.value);}});
+    this.boxes[box].forEach(space => { if (space.value != 0){ filledValues.push(space.value);}});
+    this.rows[row][col].emptySpace([1,2,3,4,5,6,7,8,9].filter(value => !filledValues.includes(value)));
     
-    //see if there is 1 duplicate in row 
-    if (this.rows[row].filter(value => value == prevValue).length == 1){
-      //get column index and box index of it if yes
-      const dupColIndex = this.rows[row].indexOf(prevValue);
-      const dupBoxIndex = 3 * (Math.floor(row / 3)) + Math.floor(dupColIndex / 3);
-      //check if also only instance of value in column and box
-      if (this.columns[dupColIndex].filter(value => value == prevValue).length == 1 && 
-        this.boxes[dupBoxIndex].filter(space => this.rows[space.row][space.col] == prevValue).length == 1){
-          //make space valid if no duplicates in box or column
-        this.gridData.updateValidity(row, dupColIndex, true);
+    //check to see if there's now 1 o 0 instances of the removed number in row
+    let dupValues: Space[] = this.rows[row].filter(space => space.value == prevValue);
+    if (dupValues.length == 1) {
+      if (this.columns[dupValues[0].col].filter(space => space.value == prevValue).length == 1
+        && this.boxes[dupValues[0].box].filter(space => space.value == prevValue).length == 1){
+          this.gridData.updateValidity(dupValues[0].row, dupValues[0].col, true);
       }
     }
-
-    //see if 1 duplicate value in column
-    if (this.columns[col].filter(value => value == prevValue).length == 1){
-      //get row index of it if yes
-      const dupRowIndex = this.columns[col].indexOf(prevValue);
-      const dupBoxIndex = 3 * (Math.floor(dupRowIndex / 3)) + Math.floor(col / 3);
-      //check if also only instance of value in row and box
-      if (this.rows[dupRowIndex].filter(value => value == prevValue).length == 1 && 
-        this.boxes[dupBoxIndex].filter(space => this.rows[space.row][space.col] == prevValue).length == 1){
-          //space is valid if no others found
-        this.gridData.updateValidity(dupRowIndex, col, true);
-      }
+    else if (dupValues.length == 0){
+      this.rows[row].forEach(space => {
+        if (this.columns[space.col].findIndex(otherSpace => otherSpace.value == prevValue) == -1 &&
+          this.boxes[space.box].findIndex(otherSpace => otherSpace.value == prevValue) == -1) {
+            space.addNum(prevValue);
+        }
+      });
     }
 
-    //now finally check if 1 duplicate row in Box
-    if (this.boxes[box].filter(space => this.rows[space.row][space.col] == prevValue).length == 1){
-      const space: any = this.boxes[box].find(space => this.rows[space.row][space.col] == prevValue);
-      //check its row and column if other duplicates are found if there's one in the box
-      if (this.rows[space.row].filter(value => value == prevValue).length == 1 && 
-        this.columns[space.col].filter(value => value == prevValue).length == 1){
-        //make space valid if no duplicates
-        this.gridData.updateValidity(space.row, space.col, true);
+    dupValues = this.columns[col].filter(space => space.value == prevValue);
+    if (dupValues.length == 1) {
+      if (this.rows[dupValues[0].row].filter(space => space.value == prevValue).length == 1
+        && this.boxes[dupValues[0].box].filter(space => space.value == prevValue).length == 1){
+          this.gridData.updateValidity(dupValues[0].row, dupValues[0].col, true);
       }
+    }
+    else if (dupValues.length == 0){
+      this.columns[col].forEach(space => {
+        if (this.rows[space.row].findIndex(otherSpace => otherSpace.value == prevValue) == -1 &&
+          this.boxes[space.box].findIndex(otherSpace => otherSpace.value == prevValue) == -1) {
+            space.addNum(prevValue);
+        }
+      });
+    }
+
+    dupValues = this.boxes[box].filter(space => space.value == prevValue);
+    if (dupValues.length == 1) {
+      if (this.columns[dupValues[0].col].filter(space => space.value == prevValue).length == 1
+        && this.rows[dupValues[0].row].filter(space => space.value == prevValue).length == 1){
+          this.gridData.updateValidity(dupValues[0].row, dupValues[0].col, true);
+      }
+    }
+    else if (dupValues.length == 0){
+      this.boxes[box].forEach(space => {
+        if (this.columns[space.col].findIndex(otherSpace => otherSpace.value == prevValue) == -1 &&
+          this.rows[space.row].findIndex(otherSpace => otherSpace.value == prevValue) == -1) {
+            space.addNum(prevValue);
+        }
+      });
     }
   }
 
@@ -127,30 +125,22 @@ export class BoardComponent implements AfterViewInit {
 
     this.gridData.increaseSpaceCounter();
 
-    //see if there is occurrence of number in row already
-    if (this.rows[row].indexOf(value) != -1){ //if yes, make both spaces invalid
-      this.gridData.updateValidity(row, this.rows[row].indexOf(value), false);
-      this.gridData.updateValidity(row, col, false);
-    }
+    const dupValueSpaces: Space[] = [];
+    //checkk Space's row, column and box for any duplicates
+    this.rows[row].forEach(space => { if (space.value == value){ dupValueSpaces.push(space);}});
+    this.columns[col].forEach(space => { if (space.value == value){ dupValueSpaces.push(space);}});
+    this.boxes[box].forEach(space => { if (space.value == value){ dupValueSpaces.push(space);}});
 
-    //now check in columns
-    if (this.columns[col].indexOf(value) != -1){
-      this.gridData.updateValidity(this.columns[col].indexOf(value), col, false);
+    if (dupValueSpaces.length > 0){ //update any duplicate values
       this.gridData.updateValidity(row, col, false);
+      dupValueSpaces.forEach(space => { this.gridData.updateValidity(space.row, space.col, false);});
     }
-
-    //check box
-    if (this.boxes[box].filter(space => this.rows[space.row][space.col] == value).length > 0){
-      this.gridData.updateValidity(row, col, false);
-      const duplicate: any = this.boxes[box].find(space => this.rows[space.row][space.col] == value);
-      this.gridData.updateValidity(duplicate.row, duplicate.col, false);
-    }
-    //add to box list
-    this.boxes[box].push(new SpaceCoords(row, col));
-
-    //finally, update the grids
-    this.rows[row][col] = value;
-    this.columns[col][row] = value;
+    //update the specific Space object
+    this.rows[row][col].fillSpace(value);
+    //update all Spaces' numsLeft lists in row, column and box
+    this.rows[row].forEach(space => space.removeNum(value));
+    this.columns[col].forEach(space => space.removeNum(value));
+    this.boxes[box].forEach(space => space.removeNum(value));
   }
 
   /**
@@ -158,20 +148,14 @@ export class BoardComponent implements AfterViewInit {
    * valid (white) spaces
    */
   clearBoard() {
-    this.gridData.setSpaceCounter(0); //set spaces filled to 0
-    this.gridData.resetInvalidSpaceCounter();
-    //empty the grids and bx lists
-    for (let i = 0; i < 9; i++){
-      this.boxes[i] = [];
-      for (let j = 0; j < 9; j++){
-        this.rows[i][j] = 0;
-        this.columns[i][j] = 0;
-      }
-    }
+    this.gridData.setSpaceCounter(0); //set spaces filled counter to 0
+    //reset all Space's numsLeft lists
+    this.rows.forEach(row => { row.forEach(space => { space.emptySpace([1,2,3,4,5,6,7,8,9]);});});
     //send signal to SpaceComponents to clear value and become valid space
     this.gridData.clearSpaces();
     this.buttonDisabled = true;
   }
+
 
   async getPuzzle() {
     this.gridData.setSpaceCounter(0);
@@ -179,24 +163,28 @@ export class BoardComponent implements AfterViewInit {
     //get the response puzzle
     const response: Response = await fetch("https://sudoku-api.vercel.app/api/dosuku?query={newboard(limit:1){grids{value}}}");
     const obj = await response.json();
-    const puzzle = obj.newboard.grids[0].value; //get the 2D array portion of response
-    //clear the boxValues list
-    this.boxes = [[],[],[],[],[],[],[],[],[]]; //empty boxes list since we're throwing away previous values
+    const puzzle: number[][] = obj.newboard.grids[0].value; //get the 2D array portion of response
+    
+    this.rows.forEach(row => row.forEach(space => {
+      space.emptySpace([1,2,3,4,5,6,7,8,9]);
+    }));
+
     for (let i = 0; i < 9; i++){
       for (let j = 0; j < 9; j++){
-        //fill up property grids with new puzzle values
-        this.rows[i][j] = puzzle[i][j];
-        this.columns[j][i] = puzzle[i][j];
-        if (puzzle[i][j] != 0) { //if nonzero value add it to box list
-          this.gridData.increaseSpaceCounter();
-          this.boxes[3 * (Math.floor(i / 3)) + Math.floor(j / 3)].push(new SpaceCoords(i, j));
+        if (puzzle[i][j] != 0) {
+          this.gridData.increaseSpaceCounter(); //increase space filled counter
+          this.rows[i][j].fillSpace(puzzle[i][j]); //fill Space object value
+          //update row, box and column spaces of current space
+          this.rows[i].forEach(space => space.removeNum(puzzle[i][j]));
+          this.columns[j].forEach(space => space.removeNum(puzzle[i][j]));
+          this.boxes[3 * Math.floor(i / 3) + Math.floor(j / 3)].forEach(space => space.removeNum(puzzle[i][j]));
         }
-        this.gridData.fillOutGrid(i, j, puzzle[i][j]); //change SpaceComponent value
+        this.gridData.fillOutGrid(i, j, puzzle[i][j]);
       }
     }
 
     this.buttonDisabled = false;
-  }
+  } 
 
   /**
    * When the Solve Puzzle button is clicked, prepareSolve is called from a separate file to solve
@@ -205,18 +193,16 @@ export class BoardComponent implements AfterViewInit {
    */
   solveGrid() {
     this.gridData.setSpaceCounter(81); //grid will have 81 filled spaces
-    //solve puzzle
-    prepareSolve(this.rows, this.columns);
-    //populate grid properties with solution
-    for (let i = 0; i < 9; i++){
-      for (let j = 0; j < 9; j++){
-        const boxIndex = 3 * (Math.floor(i / 3)) + Math.floor(j / 3);
-        if (this.boxes[boxIndex].findIndex(space => space.row == i && space.col == j) == -1){
-          this.boxes[boxIndex].push(new SpaceCoords(i, j));
-        }
-        this.gridData.fillOutGrid(i, j, this.rows[i][j]);
+    const numsLeftTable: Space[][] = [[],[],[],[],[],[],[],[],[]];
+    this.rows.forEach(row => row.forEach(space => {
+      if (space.value == 0){
+        numsLeftTable[space.numsLeft.length - 1].push(space);
       }
-    }
-
+    }));
+    //call solve function to get solution
+    solve(this.rows, this.columns, this.boxes, numsLeftTable);
+    //populate SpaceComponents with their new solved values
+    this.rows.forEach(row => { row.forEach(space => { 
+      this.gridData.fillOutGrid(space.row, space.col, space.value);});});
   }
 }
